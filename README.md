@@ -39,7 +39,8 @@ Baseado no fluxo operacional da planilha `Perdidos e Achados (Guarda-Volumes).xl
    - **Importação com Pré-visualização e Resolução de Colisões de Etiquetas** (renumerar automaticamente preservando `etiquetaOrigem`, prefixo por equipamento ou manter), permitindo juntar registros de vários celulares e PCs em um único aparelho.
    - Importação e exportação nativa `.xlsx` e `.csv` compatível com as 25 colunas da planilha original.
 8. **Modelagem MER + UML Granular**
-   - Documentada em [docs/MER.md](docs/MER.md), [docs/UML.md](docs/UML.md) e [docs/ARQUITETURA.md](docs/ARQUITETURA.md), além de visualizador Mermaid interativo integrado na aba **MER + UML** do aplicativo.
+   - Documentada em [docs/MER.md](docs/MER.md), [docs/UML.md](docs/UML.md) e [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
+   - **Explorador Gráfico-Visual Interativo (100% offline):** [docs/mer_uml_visual.html](docs/mer_uml_visual.html) e publicado online em https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/mer-uml-visual.html (também acessível na aba **MER + UML** do app).
 
 ---
 

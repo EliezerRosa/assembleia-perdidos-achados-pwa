@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Check, Copy, Network } from 'lucide-react';
+import { Check, Copy, ExternalLink, Network } from 'lucide-react';
 
 interface DiagramSpec {
   id: string;
@@ -359,17 +359,28 @@ export const ArchitectureView: React.FC = () => {
   return (
     <div className="space-y-4">
       <div className="hc-card rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-[#1e3a5f]">
-            <Network className="h-5 w-5" />
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-100 text-[#1e3a5f]">
+              <Network className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-extrabold text-slate-900">Arquitetura Interativa — MER & UML Granular</h2>
+              <p className="text-xs text-slate-500">
+                Documentação viva integrada ao PWA (também versionada em <code>docs/MER.md</code>, <code>docs/UML.md</code> e{' '}
+                <code>docs/mer_uml_visual.html</code>).
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-lg font-extrabold text-slate-900">Arquitetura Interativa — MER & UML Granular</h2>
-            <p className="text-xs text-slate-500">
-              Documentação viva integrada ao PWA (também versionada em <code>docs/MER.md</code>, <code>docs/UML.md</code> e{' '}
-              <code>docs/ARQUITETURA.md</code>).
-            </p>
-          </div>
+          <a
+            href={`${import.meta.env.BASE_URL}mer-uml-visual.html`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="touch-target inline-flex items-center gap-1.5 rounded-xl bg-[#1e3a5f] px-3.5 py-2 text-xs font-extrabold text-white shadow-xs hover:bg-[#142944] transition"
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+            Abrir Explorador Gráfico em Tela Cheia
+          </a>
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">

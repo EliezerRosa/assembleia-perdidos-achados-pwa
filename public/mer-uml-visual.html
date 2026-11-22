@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MER &amp; UML Gráfico-Visual — Perdidos e Achados &amp; Guarda-Volumes PWA</title>
+  <style>
+    /* Self-contained offline layout CSS (zero external CDN required) */
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; min-height: 100vh; display: flex; flex-direction: column; -webkit-font-smoothing: antialiased; }
+    .sticky { position: sticky; top: 0; }
+    .relative { position: relative; }
+    .z-20 { z-index: 20; }
+    .hidden { display: none !important; }
+    .inline-block { display: inline-block; }
+    .inline-flex { display: inline-flex; align-items: center; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .flex-wrap { flex-wrap: wrap; }
+    .flex-1 { flex: 1 1 0%; }
+    .shrink-0 { flex-shrink: 0; }
+    .items-center { align-items: center; }
+    .justify-center { justify-content: center; }
+    .justify-between { justify-content: space-between; }
+    .grid { display: grid; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    @media (min-width: 1180px) {
+      .xl\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+      .xl\:col-span-9 { grid-column: span 9 / span 9; }
+      .xl\:col-span-3 { grid-column: span 3 / span 3; }
+    }
+    .w-full { width: 100%; }
+    .h-full { height: 100%; }
+    .w-10 { width: 2.5rem; }
+    .h-10 { height: 2.5rem; }
+    .w-2\.5 { width: 0.625rem; }
+    .h-2\.5 { height: 0.625rem; }
+    .min-w-\[54px\] { min-width: 54px; }
+    .min-h-\[680px\] { min-height: 680px; }
+    .min-h-\[620px\] { min-height: 620px; }
+    .max-h-\[820px\] { max-height: 820px; }
+    .max-w-\[1680px\] { max-width: 1680px; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-2 { margin-top: 0.5rem; }
+    .mt-2\.5 { margin-top: 0.625rem; }
+    .mt-3 { margin-top: 0.75rem; }
+    .mt-auto { margin-top: auto; }
+    .mb-1 { margin-bottom: 0.25rem; }
+    .ml-2 { margin-left: 0.5rem; }
+    .mr-1 { margin-right: 0.25rem; }
+    .p-2\.5 { padding: 0.625rem; }
+    .p-3 { padding: 0.75rem; }
+    .p-4 { padding: 1rem; }
+    .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+    .px-2\.5 { padding-left: 0.625rem; padding-right: 0.625rem; }
+    .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .px-3\.5 { padding-left: 0.875rem; padding-right: 0.875rem; }
+    .px-4 { padding-left: 1rem; padding-right: 1rem; }
+    .py-0\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+    .py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+    .py-2\.5 { padding-top: 0.625rem; padding-bottom: 0.625rem; }
+    .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+    .pt-2\.5 { padding-top: 0.625rem; }
+    .pt-3 { padding-top: 0.75rem; }
+    .pb-3 { padding-bottom: 0.75rem; }
+    .gap-1 { gap: 0.25rem; }
+    .gap-1\.5 { gap: 0.375rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-1\.5 > * + * { margin-top: 0.375rem; }
+    .space-y-2\.5 > * + * { margin-top: 0.625rem; }
+    .border { border-width: 1px; border-style: solid; }
+    .border-b { border-bottom-width: 1px; border-bottom-style: solid; }
+    .border-t { border-top-width: 1px; border-top-style: solid; }
+    .rounded-sm { border-radius: 0.125rem; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-lg { border-radius: 0.5rem; }
+    .rounded-xl { border-radius: 0.75rem; }
+    .rounded-2xl { border-radius: 1rem; }
+    .rounded-full { border-radius: 9999px; }
+    .shadow-sm { box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08); }
+    .overflow-hidden { overflow: hidden; }
+    .overflow-y-auto { overflow-y: auto; }
+    .text-xs { font-size: 0.75rem; line-height: 1.15rem; }
+    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+    .text-base { font-size: 1rem; line-height: 1.4rem; }
+    .text-center { text-align: center; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
+    .font-black { font-weight: 900; }
+    .uppercase { text-transform: uppercase; }
+    .tracking-tight { letter-spacing: -0.02em; }
+    .tracking-wide { letter-spacing: 0.03em; }
+    .tracking-wider { letter-spacing: 0.06em; }
+    .leading-tight { line-height: 1.2; }
+    .leading-snug { line-height: 1.35; }
+    .leading-relaxed { line-height: 1.5; }
+    .cursor-pointer { cursor: pointer; }
+    .cursor-grab { cursor: grab; }
+    .cursor-grab:active { cursor: grabbing; }
+    .transition { transition: all 0.15s ease; }
+    ul { list-style: none; margin: 0; padding: 0; }
+    h1, h2, p { margin: 0; }
+    button { font-family: inherit; }
+  </style>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    .svg-node { cursor: pointer; transition: filter 0.15s ease; }
+    .svg-node:hover { filter: drop-shadow(0 5px 12px rgba(30, 58, 95, 0.22)); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    svg text { user-select: none; }
+  </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header id="app-header" class="sticky top-0 z-20 border-b px-4 py-3">
+    <div class="max-w-[1680px] mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div id="brand-badge" class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-xs tracking-wide shrink-0 shadow-sm">
+          UML
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight leading-tight">
+            MER &amp; UML Gráfico-Visual — Perdidos e Achados &amp; Guarda-Volumes PWA
+          </h1>
+          <p id="header-sub" class="text-xs">
+            Arraste o diagrama para mover • Role ou use +/− para zoom • Clique em qualquer bloco para inspecionar chaves, regras §54–58 e colunas Excel
+          </p>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="flex flex-wrap items-center gap-1.5 text-xs">
+        <button id="zoom-out" class="ctrl-btn px-2.5 py-1.5 rounded-lg border font-bold cursor-pointer" title="Diminuir zoom">−</button>
+        <span id="zoom-readout" class="mono px-2 py-1 min-w-[54px] text-center font-bold">100%</span>
+        <button id="zoom-in" class="ctrl-btn px-2.5 py-1.5 rounded-lg border font-bold cursor-pointer" title="Aumentar zoom">+</button>
+        <button id="zoom-100" class="ctrl-btn px-2.5 py-1.5 rounded-lg border font-semibold cursor-pointer">100%</button>
+        <button id="zoom-fit" class="ctrl-btn px-3 py-1.5 rounded-lg border font-semibold cursor-pointer">Ajustar</button>
+        <button id="btn-export-svg" class="ctrl-btn px-3 py-1.5 rounded-lg border font-semibold cursor-pointer" title="Baixar diagrama atual em SVG">Baixar SVG</button>
+        <button id="btn-theme" class="ctrl-btn px-3 py-1.5 rounded-lg border font-semibold cursor-pointer" title="Alternar tema Claro/Escuro">Tema</button>
+      </div>
+    </div>
+
+    <!-- Main Tabs -->
+    <nav id="tabs" class="max-w-[1680px] mx-auto mt-3 flex flex-wrap gap-1.5" aria-label="Diagramas MER e UML">
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="mer" data-active="true">1. MER (Pé-de-Galinha)</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="states" data-active="false">2. UML • Estados (Ciclo de Vida)</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="usecases" data-active="false">3. UML • Casos de Uso</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="classes" data-active="false">4. UML • Classes</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="sequence" data-active="false">5. UML • Sequências (3 Fluxos)</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="components" data-active="false">6. UML • Componentes PWA</button>
+    </nav>
+
+    <!-- Subtabs for Sequence -->
+    <div id="seq-subtabs" class="hidden max-w-[1680px] mx-auto mt-2.5 pt-2.5 border-t flex flex-wrap items-center gap-1.5 text-xs">
+      <span id="seq-label" class="font-semibold mr-1">Fluxo de Sequência:</span>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="intake" data-active="true">A. Recepção (Voz + Foto 1 → Etiqueta → Foto 2)</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="delivery" data-active="false">B. Conferência (§55) &amp; Entrega + Rastreio</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="merge" data-active="false">C. Mesclagem Multi-Dispositivo (Mobile ↔ PC)</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-[1680px] w-full mx-auto grid grid-cols-1 xl:grid-cols-12 gap-3 p-3">
+    <!-- Diagram Stage -->
+    <section id="stage-card" class="xl:col-span-9 border rounded-2xl overflow-hidden flex flex-col min-h-[680px] shadow-sm">
+      <div id="stage-bar" class="px-4 py-2.5 border-b flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div>
+          <span id="stage-title" class="font-extrabold"></span>
+          <span id="stage-subtitle" class="ml-2"></span>
+        </div>
+        <div id="stage-legend" class="flex flex-wrap items-center gap-3 text-xs font-semibold"></div>
+      </div>
+
+      <div id="viewport" class="relative flex-1 overflow-hidden cursor-grab active:cursor-grabbing min-h-[620px]">
+        <div id="svg-host" class="w-full h-full"></div>
+      </div>
+    </section>
+
+    <!-- Right Inspector Panel -->
+    <aside id="insp-card" class="xl:col-span-3 border rounded-2xl p-4 flex flex-col gap-3 overflow-y-auto max-h-[820px] shadow-sm">
+      <div id="insp-header" class="pb-3 border-b">
+        <span id="insp-badge" class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold">
+          Inspetor Técnico
+        </span>
+        <h2 id="insp-title" class="mt-2 text-sm font-extrabold">Selecione um bloco no diagrama</h2>
+        <p id="insp-desc" class="mt-1 text-xs leading-relaxed">
+          Clique em qualquer entidade, estado, ator, classe ou componente para visualizar detalhes técnicos, PK/FK e regras oficiais.
+        </p>
+      </div>
+
+      <div id="insp-body" class="space-y-2.5 text-xs"></div>
+
+      <div id="policy-footer" class="mt-auto pt-3 border-t space-y-1.5">
+        <div id="policy-heading" class="font-extrabold text-xs uppercase tracking-wider">Regras Oficiais (§54–58)</div>
+        <div id="policy-box" class="p-2.5 rounded-xl border text-xs space-y-1.5 leading-snug">
+          <div><strong id="p55">§55 Não Expor:</strong> Alto/Precioso, carteiras, bolsas e celulares ficam em área restrita.</div>
+          <div><strong id="p56">§56 Pessoas Perdidas:</strong> Criança/Idoso/Adulto — proibido anunciar no microfone; avisar Indicadores, SA e SC.</div>
+          <div><strong id="p57">§57 Contas &amp; 60d:</strong> Dinheiro → Depto. Contas; retidos ≥60 dias → Destinar (SA).</div>
+          <div><strong id="p58">§58 Guarda-Volumes:</strong> Exceto roupas, exige Nome, Telefone, Congregação e Endereço.</div>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+<script>
+(() => {
+  // ---------- THEME PALETTE ENGINE (Resolves concrete hex colors so SVG NEVER turns black!) ----------
+  let manualTheme = null; // null = auto detect, 'light' | 'dark'
+
+  function readHostVar(name) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || null;
+  }
+
+  function isDarkMode() {
+    if (manualTheme === 'dark') return true;
+    if (manualTheme === 'light') return false;
+    if (document.documentElement.classList.contains('dark')) return true;
+    if (document.documentElement.classList.contains('light')) return false;
+    // Detect from host --background luminance if present
+    const hostBg = readHostVar('--background');
+    if (hostBg && hostBg.startsWith('#') && hostBg.length >= 7) {
+      const r = parseInt(hostBg.slice(1, 3), 16);
+      const g = parseInt(hostBg.slice(3, 5), 16);
+      const b = parseInt(hostBg.slice(5, 7), 16);
+      return (r * 0.299 + g * 0.587 + b * 0.114) < 128;
+    }
+    return false; // Default crisp light theme when opened standalone in browser
+  }
+
+  function getPalette() {
+    const dark = isDarkMode();
+    if (dark) {
+      return {
+        dark: true,
+        bg: readHostVar('--background') || '#0b1120',
+        card: readHostVar('--card') || '#131c31',
+        content: readHostVar('--content') || '#1a2540',
+        border: readHostVar('--border') || '#2c3d5f',
+        fg: readHostVar('--foreground') || '#f1f5f9',
+        muted: readHostVar('--muted-foreground') || '#94a3b8',
+        primary: '#38bdf8',
+        primaryFg: '#082f49',
+        teal: '#2dd4bf',
+        success: '#34d399',
+        warning: '#fbbf24',
+        error: '#fb7185',
+        purple: '#c084fc',
+        blue: '#60a5fa',
+        gridDot: 'rgba(148, 163, 184, 0.22)',
+      };
+    }
+    return {
+      dark: false,
+      bg: readHostVar('--background') || '#f1f5f9',
+      card: readHostVar('--card') || '#ffffff',
+      content: readHostVar('--content') || '#f8fafc',
+      border: readHostVar('--border') || '#cbd5e1',
+      fg: readHostVar('--foreground') || '#0f172a',
+      muted: readHostVar('--muted-foreground') || '#475569',
+      primary: '#1e3a5f',
+      primaryFg: '#ffffff',
+      teal: '#0f766e',
+      success: '#059669',
+      warning: '#d97706',
+      error: '#dc2626',
+      purple: '#7c3aed',
+      blue: '#2563eb',
+      gridDot: 'rgba(100, 116, 139, 0.24)',
+    };
+  }
+
+  let P = getPalette();
+
+  function applyChromeTheme() {
+    P = getPalette();
+    document.body.style.backgroundColor = P.bg;
+    document.body.style.color = P.fg;
+
+    const header = document.getElementById('app-header');
+    header.style.backgroundColor = P.card;
+    header.style.borderColor = P.border;
+
+    const badge = document.getElementById('brand-badge');
+    badge.style.backgroundColor = P.primary;
+    badge.style.color = P.primaryFg;
+
+    document.getElementById('header-sub').style.color = P.muted;
+    document.getElementById('zoom-readout').style.color = P.fg;
+
+    document.querySelectorAll('.ctrl-btn').forEach(b => {
+      b.style.backgroundColor = P.content;
+      b.style.borderColor = P.border;
+      b.style.color = P.fg;
+    });
+
+    document.getElementById('btn-theme').textContent = P.dark ? '☀ Claro' : '☾ Escuro';
+
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      const act = b.getAttribute('data-active') === 'true';
+      b.style.backgroundColor = act ? P.primary : P.content;
+      b.style.borderColor = act ? P.primary : P.border;
+      b.style.color = act ? P.primaryFg : P.fg;
+    });
+
+    const seqWrap = document.getElementById('seq-subtabs');
+    seqWrap.style.borderColor = P.border;
+    document.getElementById('seq-label').style.color = P.muted;
+    document.querySelectorAll('.subtab-btn').forEach(b => {
+      const act = b.getAttribute('data-active') === 'true';
+      b.style.backgroundColor = act ? P.teal : P.content;
+      b.style.borderColor = act ? P.teal : P.border;
+      b.style.color = act ? '#ffffff' : P.fg;
+    });
+
+    const stageCard = document.getElementById('stage-card');
+    stageCard.style.backgroundColor = P.card;
+    stageCard.style.borderColor = P.border;
+
+    const stageBar = document.getElementById('stage-bar');
+    stageBar.style.backgroundColor = P.content;
+    stageBar.style.borderColor = P.border;
+    document.getElementById('stage-subtitle').style.color = P.muted;
+
+    const vp = document.getElementById('viewport');
+    vp.style.backgroundColor = P.bg;
+    vp.style.backgroundImage = `radial-gradient(${P.gridDot} 1px, transparent 1px)`;
+    vp.style.backgroundSize = '20px 20px';
+
+    const inspCard = document.getElementById('insp-card');
+    inspCard.style.backgroundColor = P.card;
+    inspCard.style.borderColor = P.border;
+    document.getElementById('insp-header').style.borderColor = P.border;
+    document.getElementById('insp-badge').style.backgroundColor = P.primary;
+    document.getElementById('insp-badge').style.color = P.primaryFg;
+    document.getElementById('insp-desc').style.color = P.muted;
+
+    document.getElementById('policy-footer').style.borderColor = P.border;
+    document.getElementById('policy-heading').style.color = P.muted;
+    const pbox = document.getElementById('policy-box');
+    pbox.style.backgroundColor = P.content;
+    pbox.style.borderColor = P.border;
+    document.getElementById('p55').style.color = P.warning;
+    document.getElementById('p56').style.color = P.error;
+    document.getElementById('p57').style.color = P.blue;
+    document.getElementById('p58').style.color = P.success;
+  }
+
+  // ---------- INSPECTOR CATALOG ----------
+  const INSPECTOR = {
+    'mer-evento': {
+      badge: 'Entidade MER • PK: id',
+      title: 'EVENTO (Assembleia / Congresso)',
+      desc: 'Agrupa todos os itens, solicitações de itens procurados e o Relatório Final de um evento específico. No merge offline multi-dispositivo, eventos criados separadamente são unificados pelo par lógico (codigo + data).',
+      sections: [
+        { label: 'Chaves & Controle', items: ['PK id (UUID ou fk_id_Eventos Glide)', 'UNIQUE lógica (codigo, data)', 'proximaEtiqueta (auto-incremento por evento)', 'status: ativo | encerrado'] },
+        { label: 'Mapeamento Planilha Excel', items: ['Evento Tipo → tipo (Assembleia | Congresso)', 'Evento Código → codigo (ES-005.27.1, CO-2027)', 'Evento Data / X Evento Data → data', 'Relatório PDF → circuito, parte (A/B), voluntários'] },
+        { label: 'Relacionamentos', items: ['1:N com ITEM', '1:N com ITEM_PROCURADO', '1:0..1 com RELATORIO_FINAL'] },
+      ]
+    },
+    'mer-item': {
+      badge: 'Entidade Central • 25+ Colunas Excel',
+      title: 'ITEM (Achados, Perdidos & Guarda-Volumes)',
+      desc: 'Entidade central do sistema. Mapeia 1:1 todas as 25 colunas da planilha Excel e adiciona evidência fotográfica tripla (Foto 1 Item, Foto 2 Etiqueta/Formulário, Foto 3 Entrega), ciclo de vida auditável e rastreabilidade multi-dispositivo.',
+      sections: [
+        { label: 'Fluxo Foto • Etiqueta • Foto (Req. #3)', items: ['fotoEntrada — Foto 1 (item + etiqueta #N colada)', 'etiqueta + etiquetaCodigo + formPagina (etiqueta gêmea)', 'etiquetaConfirmadaNoItem & etiquetaConfirmadaNoFormulario', 'fotoEtiqueta — Foto 2 (etiqueta no formulário físico)', 'fotoEntrega — Foto 3 (comprovante entrega opcional)'] },
+        { label: 'Classificação & Políticas (§55–§58)', items: ['valor: Baixo | Comum | Médio | Alto | Precioso', 'categoria: Perdido | Guardado | Criança | Idoso | Adulto', 'status: Ainda Guardado | Em Conferência | Já Entregue | DESPACHADO', 'destino: DESCARTAR | DOAR | VENDER | CONTAS'] },
+        { label: 'Multi-Dispositivo (Req. #9)', items: ['deviceId, deviceName, syncedFromDevices[]', 'etiquetaOrigem (preserva nº original em renumeração no merge)'] },
+      ]
+    },
+    'mer-rastreio': {
+      badge: 'Entidade Auditável • 1:N de ITEM',
+      title: 'RASTREIO_EVENTO (Linha do Tempo)',
+      desc: 'Trilha cronológica imutável que registra cada transição desde a entrada no balcão até a devolução ao dono, encaminhamento ao Depto. de Contas, destinação pelo SA ou mesclagem de outro equipamento.',
+      sections: [
+        { label: 'Etapas Registradas (12 Estados)', items: ['RECEBIDO • ETIQUETADO • FOTO_REGISTRADA', 'CONFERENCIA • VINCULADO_PROCURADO • RETIDO_ALERTA', 'TRANSFERIDO_DISPOSITIVO (merge Mobile ↔ PC)', 'ENTREGUE • ENTREGUE_CONTAS • DESPACHADO_SA • REABERTO • EDITADO'] },
+        { label: 'Atributos de Auditoria', items: ['timestamp (ISO-8601)', 'operador (voluntário/SA)', 'dispositivo (celular/PC)', 'localizacao (Mesa, Cofre §55, Prateleira GV, Contas, SA)'] },
+      ]
+    },
+    'mer-procurado': {
+      badge: 'Entidade MER • N:M com ITEM',
+      title: 'ITEM_PROCURADO',
+      desc: 'Solicitações de pessoas que procuram objetos ainda não entregues no balcão. Faz pontuação automática de similaridade contra toda a base (inclusive já entregues, para rastreio).',
+      sections: [{ label: 'Atributos', items: ['PK id • FK eventoId', 'nomeTelefone, congregacao, descricao, foto (ref. WhatsApp)', 'provaveisItensIds[] (vínculo N:M)', 'status: PROCURANDO | LOCALIZADO | ENTREGUE | CANCELADO'] }]
+    },
+    'mer-relatorio': {
+      badge: 'Entidade MER • 1:1 com EVENTO',
+      title: 'RELATORIO_FINAL (Folha Oficial A4)',
+      desc: 'Espelho fiel do formulário "Relatório Final - Após o Evento" do Salão de Assembleias (Guarapari/ES), preenchível por voz e imprimível em PDF A4 limpo.',
+      sections: [{ label: 'Campos Oficiais', items: ['circuito, eventoTipo, parte (A/B), data, departamento', 'superintendente, ajudantes, voluntariosNecessarios/Usados', 'dificuldadeAntes / Durante / Apos (SIM/NÃO + texto)', 'sugestoes, responsavelRelatorio, congregacao, assinatura'] }]
+    },
+    'mer-catalogo': {
+      badge: 'Lookup • 1:N',
+      title: 'TIPO_ITEM_CATALOGO',
+      desc: 'Catálogo normalizado a partir dos 170 registros reais da planilha Excel (57 tipos padronizados) acrescido de novos tipos criados livremente pelos voluntários.',
+      sections: [{ label: 'Exemplos', items: ['Garrafa Térmica, Celular, Bíblia, Óculos, Anel, Brinco, Chave', 'Carrinho de Bebê, Bolsa Térmica, Dinheiro, Criança / Pessoa'] }]
+    },
+    'mer-config': {
+      badge: 'Singleton Local • localStorage',
+      title: 'CONFIG_DISPOSITIVO',
+      desc: 'Identidade persistente do celular ou PC em localStorage ("assembleia_pa_db_v1"), permitindo operar múltiplos balcões sem colisão física de etiquetas.',
+      sections: [{ label: 'Parâmetros', items: ['deviceId, deviceName, operadorPadrao', 'prefixoEtiqueta (ex.: A-, B-) & etiquetaInicial (1, 101, 201)', 'prazoRetencaoDias (padrão 60 dias)', 'vozFeedbackFalado (TTS), tema, tamanhoFonte, autoMarcaDaguaEtiqueta'] }]
+    },
+    'mer-synclog': {
+      badge: 'Auditoria • 1:N',
+      title: 'SYNC_LOG (Histórico de Trocas)',
+      desc: 'Registra toda exportação JSON, mesclagem entre equipamentos e importação/exportação de planilha Excel/CSV.',
+      sections: [{ label: 'Tipos Auditados', items: ['EXPORT_JSON • IMPORT_MERGE_JSON', 'IMPORT_EXCEL • EXPORT_EXCEL • EXPORT_CSV', 'Contadores: eventos, itens, atualizados, colisoesResolvidas'] }]
+    },
+    'st-recepcao': { badge: 'Etapa Inicial', title: '1. Recepção + Foto 1 (Item com Etiqueta)', desc: 'Voluntário recebe próximo número #N, cola a 1ª etiqueta física no objeto e tira Foto 1 (compressão Canvas ~40 KB + carimbo opcional).', sections: [{ label: 'Rastreio & Voz', items: ['Eventos RECEBIDO + FOTO_REGISTRADA', 'Acionável por voz: "Novo item" / "Guarda-volumes" / "Criança perdida"'] }] },
+    'st-etiqueta2': { badge: 'Etapa Dupla Etiqueta', title: '2. Etiqueta Gêmea no Formulário + Foto 2', desc: 'Cola a 2ª etiqueta gêmea #N na página do formulário em papel (Form Página) e tira Foto 2, fechando o fluxo Foto → Etiqueta → Foto.', sections: [{ label: 'Validações', items: ['Checklists etiquetaNoItem + etiquetaNoForm', 'Política §58 exige Nome/Tel. e Congregação em Guarda-Volumes (exceto roupas)'] }] },
+    'st-guardado': { badge: 'Estado Composto Ativo', title: 'Ainda Guardado (Custódia por Política)', desc: 'Direciona automaticamente a guarda física correta conforme valor e categoria.', sections: [{ label: '4 Sub-estados de Custódia', items: ['Mesa Exposição: Valor Baixo/Comum/Médio', 'Cofre Restrito (§55): Alto/Precioso, Bolsa, Carteira, Celular, Chave', 'Prateleira GV (§58): Categoria Guardado', 'Pessoa Perdida (§56): Criança/Idoso/Adulto (SEM anúncio mic)'] }] },
+    'st-conferencia': { badge: 'Estado Intermediário', title: 'Em Conferência', desc: 'Item separado quando um solicitante o descreve no balcão ou há match com Item Procurado.', sections: [{ label: 'Transições', items: ['→ Já Entregue (confirmado)', '→ Ainda Guardado (não conferiu)'] }] },
+    'st-retido': { badge: 'Temporal (>= 60 dias)', title: 'Retido (>= 60 dias sem retirada)', desc: 'Calculado por isItemRetido(item, 60). Entra automaticamente no Deck "Destinar (SA)".', sections: [{ label: 'Destinos', items: ['→ Já Entregue (dono tardio)', '→ DESPACHADO pelo SA (DOAR | VENDER | DESCARTAR)'] }] },
+    'st-entregue': { badge: 'Estado Final Positivo', title: 'Já Entregue (Dono / Retirante)', desc: 'Devolução confirmada com quem pegou, dados do dono, data/hora e Foto 3 (comprovante opcional).', sections: [{ label: 'Auditoria', items: ['Reversível via Reabertura auditada (etapa REABERTO)'] }] },
+    'st-contas': { badge: 'Política §57 — Dinheiro', title: 'Entregue ao Depto. de Contas', desc: 'Dinheiro não procurado até o fim da assembleia vai ao Departamento de Contas.', sections: [{ label: 'Detecção', items: ['Automática por isCashItem()'] }] },
+    'st-despachado': { badge: 'Estado Final SA', title: 'DESPACHADO (Superintendente de Assembleia)', desc: 'SA escolhe DOAR, VENDER (conta do circuito) ou DESCARTAR no Deck Destinar.', sections: [{ label: 'Auditoria', items: ['Evento DESPACHADO_SA com operador, data/hora e destino'] }] },
+    'uc-vol': { badge: 'Ator Primário', title: 'Voluntário do Balcão', desc: 'Opera durante todo o evento (§54): cadastra itens Foto-Etiqueta-Foto, Guarda-Volumes (§58), pessoas perdidas (§56), comandos por voz, busca, conferência e entrega.', sections: [{ label: 'Casos de Uso', items: ['UC01 a UC09'] }] },
+    'uc-enc': { badge: 'Ator Coordenação', title: 'Encarregado do Departamento', desc: 'Cria eventos, consolida pacotes JSON de todos os equipamentos da equipe, importa/exporta Excel e emite o Relatório Final A4.', sections: [{ label: 'Casos de Uso', items: ['UC01, UC10, UC12, UC13, UC14'] }] },
+    'uc-sa': { badge: 'Ator Decisor Pós-Evento', title: 'Superintendente de Assembleia (SA)', desc: 'Avalia itens retidos há ≥60 dias no Deck Destinar para DOAR, VENDER ou DESCARTAR e recebe o Relatório Final.', sections: [{ label: 'Casos de Uso', items: ['UC11 (Destinar Retidos ≥60d)', 'UC12 (Relatório Final)'] }] },
+    'uc-dono': { badge: 'Ator Externo', title: 'Dono / Solicitante', desc: 'Deixa volumes no Guarda-Volumes, descreve itens de valor (§55), registra procura e retira itens conferidos.', sections: [{ label: 'Interações', items: ['UC03, UC06, UC07, UC08'] }] },
+    'uc-dev': { badge: 'Sistema Externo', title: 'Outro Celular / PC', desc: 'Equipamentos offline que exportam pacotes SyncBundle JSON (com fotos e rastreio) para consolidação sem colisões.', sections: [{ label: 'Integração', items: ['UC14 (Exportar / Importar / Mesclar)'] }] },
+    'cls-db': { badge: 'Aggregate Root', title: 'AppDatabase', desc: 'Estrutura completa serializada em localStorage (chave assembleia_pa_db_v1).', sections: [{ label: 'Arquivo', items: ['src/types/domain.ts'] }] },
+    'cls-storage': { badge: 'Serviço Persistência', title: 'StorageService', desc: 'Leitura/gravação em localStorage, medidor KB/MB/%, proteção QuotaExceededError e dados demo fictícios.', sections: [{ label: 'Arquivo', items: ['src/services/storageService.ts'] }] },
+    'cls-tracking': { badge: 'Motor de Domínio', title: 'TrackingService', desc: 'Máquina de estados, regras §55–§58, retenção 60 dias e eventos imutáveis de rastreio.', sections: [{ label: 'Testes', items: ['src/services/trackingService.ts (4 testes aprovados)'] }] },
+    'cls-photo': { badge: 'Serviço Mídia', title: 'PhotoService', desc: 'Canvas resize ≤900px, JPEG 0.72 (~40 KB) e carimbo opcional de etiqueta + hora.', sections: [{ label: 'Arquivo', items: ['src/services/photoService.ts'] }] },
+    'cls-voice': { badge: 'Acessibilidade pt-BR', title: 'VoiceService', desc: 'Web Speech API (SpeechRecognition + SpeechSynthesis TTS) + parser NLP multi-campo.', sections: [{ label: 'Testes', items: ['src/services/voiceService.ts (3 testes aprovados)'] }] },
+    'cls-merge': { badge: 'Motor Multi-Dispositivo', title: 'MergeService', desc: 'SyncBundle V1, previewMerge com detecção de colisões e executeMerge preservando etiquetaOrigem e fotos.', sections: [{ label: 'Testes', items: ['src/services/mergeService.ts (2 testes aprovados)'] }] },
+    'cls-excel': { badge: 'Adaptador Planilha', title: 'ExcelService (SheetJS)', desc: 'Importa e exporta todas as 25 colunas de "Perdidos e Achados (Guarda-Volumes).xlsx" e CSV.', sections: [{ label: 'Validação', items: ['Validado contra 170/170 registros reais'] }] },
+    'cmp-pwa': { badge: 'Camada PWA', title: 'Workbox SW + Web Manifest', desc: 'Pré-cache de 69 assets para funcionamento 100% offline em PC, Android e iOS.', sections: [{ label: 'Deploy HTTPS', items: ['GitHub Pages: /assembleia-perdidos-achados-pwa/'] }] },
+    'cmp-ui': { badge: 'Camada Apresentação', title: 'React 19 + Tailwind CSS v4 (7 Views)', desc: 'Sidebar PC + Bottom Nav Mobile, modais Foto-Etiqueta-Foto, Deck SA, Relatório A4 @media print e Alto Contraste.', sections: [{ label: 'Atalhos', items: ['Alt+V (Voz) • Ctrl+K (Comandos) • Alvos ≥44px'] }] },
+    'cmp-store': { badge: 'Estado Global', title: 'AppProvider Context Store', desc: 'Sincroniza UI, Assistente de Voz, Toasts, TTS e persistência automática no localStorage.', sections: [{ label: 'Arquivo', items: ['src/store/useAppStore.tsx'] }] },
+    'cmp-apis': { badge: 'Web APIs Nativas', title: 'Hardware & Storage do Dispositivo', desc: 'localStorage, Camera API, Web Speech API, Web Share API e window.print() sem backend.', sections: [{ label: 'Plataformas', items: ['Chrome/Edge PC, Android Chrome, iOS Safari'] }] },
+  };
+
+  let selectedNodeId = null;
+
+  function showInspector(id) {
+    const data = INSPECTOR[id];
+    if (!data) return;
+    selectedNodeId = id;
+
+    // Visual highlight on SVG node
+    document.querySelectorAll('.svg-node .node-frame').forEach(f => {
+      const orig = f.getAttribute('data-orig-stroke');
+      const origW = f.getAttribute('data-orig-sw');
+      if (orig) f.setAttribute('stroke', orig);
+      if (origW) f.setAttribute('stroke-width', origW);
+    });
+    const el = document.querySelector(`[data-node="${id}"] .node-frame`);
+    if (el) {
+      el.setAttribute('stroke', P.primary);
+      el.setAttribute('stroke-width', '3.4');
+    }
+
+    document.getElementById('insp-badge').textContent = data.badge;
+    document.getElementById('insp-title').textContent = data.title;
+    document.getElementById('insp-desc').textContent = data.desc;
+
+    const body = document.getElementById('insp-body');
+    body.innerHTML = (data.sections || []).map(s => `
+      <div style="background:${P.content}; border:1px solid ${P.border};" class="rounded-xl p-2.5">
+        <div style="color:${P.fg};" class="font-bold mb-1">${s.label}</div>
+        <ul style="color:${P.muted};" class="space-y-1">
+          ${s.items.map(i => `<li class="flex gap-1.5"><span style="color:${P.teal}; font-weight:800;">•</span><span>${i}</span></li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+  }
+
+  // ---------- SVG BUILDERS (100% CONCRETE COLORS FROM PALETTE P) ----------
+  function svgDefs() {
+    return `
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="${P.muted}" />
+        </marker>
+        <marker id="arrow-primary" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="${P.primary}" />
+        </marker>
+        <marker id="arrow-success" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="${P.success}" />
+        </marker>
+        <marker id="arrow-warning" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 1 L 10 5 L 0 9 z" fill="${P.warning}" />
+        </marker>
+        <marker id="diamond" viewBox="0 0 14 10" refX="0" refY="5" markerWidth="11" markerHeight="8" orient="auto">
+          <path d="M 0 5 L 7 1 L 14 5 L 7 9 z" fill="${P.primary}" />
+        </marker>
+        <marker id="crow-many" viewBox="0 0 16 14" refX="14" refY="7" markerWidth="13" markerHeight="11" orient="auto">
+          <path d="M 0 7 L 15 1 M 0 7 L 15 7 M 0 7 L 15 13 M 4 2 L 4 12" stroke="${P.primary}" stroke-width="1.8" fill="none"/>
+        </marker>
+        <marker id="crow-one" viewBox="0 0 12 14" refX="6" refY="7" markerWidth="10" markerHeight="11" orient="auto">
+          <path d="M 4 1 L 4 13 M 8 1 L 8 13" stroke="${P.primary}" stroke-width="1.8" fill="none"/>
+        </marker>
+        <marker id="crow-zero-one" viewBox="0 0 20 14" refX="16" refY="7" markerWidth="15" markerHeight="11" orient="auto">
+          <circle cx="6" cy="7" r="3.5" fill="${P.card}" stroke="${P.primary}" stroke-width="1.8"/>
+          <path d="M 14 1 L 14 13" stroke="${P.primary}" stroke-width="1.8" fill="none"/>
+        </marker>
+      </defs>
+    `;
+  }
+
+  function erBox(id, x, y, w, title, accent, rows) {
+    const headerH = 34;
+    const rowH = 21;
+    const h = headerH + rows.length * rowH + 10;
+    const rowsSvg = rows.map((r, i) => {
+      const ry = y + headerH + 16 + i * rowH;
+      const zebra = i % 2 === 1 ? `<rect x="${x + 1}" y="${ry - 14}" width="${w - 2}" height="${rowH}" fill="${P.content}" fill-opacity="0.7"/>` : '';
+      const badgeColor = r.k === 'PK' ? P.warning : P.blue;
+      const badge = r.k ? `<rect x="${x + 8}" y="${ry - 11}" width="24" height="14" rx="3" fill="${badgeColor}" fill-opacity="0.2"/><text x="${x + 20}" y="${ry - 1}" text-anchor="middle" font-size="9.5" font-weight="800" fill="${badgeColor}">${r.k}</text>` : '';
+      const tx = r.k ? x + 38 : x + 12;
+      return `${zebra}${badge}<text x="${tx}" y="${ry}" font-size="11.5" font-weight="${r.k ? '700' : '500'}" fill="${P.fg}" class="mono">${r.n}</text><text x="${x + w - 10}" y="${ry}" text-anchor="end" font-size="10.5" fill="${P.muted}">${r.t}</text>`;
+    }).join('');
+
+    return `
+      <g class="svg-node" data-node="${id}">
+        <rect class="node-frame" data-orig-stroke="${accent}" data-orig-sw="1.8" x="${x}" y="${y}" width="${w}" height="${h}" rx="10" fill="${P.card}" stroke="${accent}" stroke-width="1.8"/>
+        <path d="M ${x+1} ${y+10} Q ${x+1} ${y+1} ${x+10} ${y+1} L ${x+w-10} ${y+1} Q ${x+w-1} ${y+1} ${x+w-1} ${y+10} L ${x+w-1} ${y+headerH} L ${x+1} ${y+headerH} Z" fill="${accent}"/>
+        <text x="${x + 12}" y="${y + 22}" font-size="12.5" font-weight="800" fill="#ffffff">${title}</text>
+        ${rowsSvg}
+      </g>
+    `;
+  }
+
+  function umlClassBox(id, x, y, w, stereotype, title, accent, attrs, methods) {
+    const headH = stereotype ? 44 : 32;
+    const attrH = attrs.length * 18 + 12;
+    const methH = methods.length * 18 + 12;
+    const totalH = headH + attrH + methH;
+
+    const attrSvg = attrs.map((a, i) =>
+      `<text x="${x + 10}" y="${y + headH + 16 + i * 18}" font-size="11" fill="${P.fg}" class="mono">${a}</text>`
+    ).join('');
+    const methSvg = methods.map((m, i) =>
+      `<text x="${x + 10}" y="${y + headH + attrH + 16 + i * 18}" font-size="11" font-weight="600" fill="${P.teal}" class="mono">${m}</text>`
+    ).join('');
+
+    return `
+      <g class="svg-node" data-node="${id}">
+        <rect class="node-frame" data-orig-stroke="${accent}" data-orig-sw="1.8" x="${x}" y="${y}" width="${w}" height="${totalH}" rx="9" fill="${P.card}" stroke="${accent}" stroke-width="1.8"/>
+        <path d="M ${x+1} ${y+9} Q ${x+1} ${y+1} ${x+9} ${y+1} L ${x+w-9} ${y+1} Q ${x+w-1} ${y+1} ${x+w-1} ${y+9} L ${x+w-1} ${y+headH} L ${x+1} ${y+headH} Z" fill="${accent}"/>
+        <line x1="${x}" y1="${y + headH + attrH}" x2="${x + w}" y2="${y + headH + attrH}" stroke="${P.border}" stroke-width="1.3"/>
+        ${stereotype ? `<text x="${x + w/2}" y="${y + 16}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.85)">«${stereotype}»</text>` : ''}
+        <text x="${x + w/2}" y="${y + (stereotype ? 34 : 21)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#ffffff">${title}</text>
+        ${attrSvg}
+        ${methSvg}
+      </g>
+    `;
+  }
+
+  function stickActor(id, cx, cy, label, color) {
+    return `
+      <g class="svg-node" data-node="${id}">
+        <rect class="node-frame" data-orig-stroke="${color}" data-orig-sw="1.8" x="${cx - 58}" y="${cy - 34}" width="116" height="108" rx="12" fill="${P.card}" stroke="${color}" stroke-width="1.8"/>
+        <circle cx="${cx}" cy="${cy - 14}" r="10" fill="none" stroke="${color}" stroke-width="2.4"/>
+        <line x1="${cx}" y1="${cy - 4}" x2="${cx}" y2="${cy + 22}" stroke="${color}" stroke-width="2.4"/>
+        <line x1="${cx - 16}" y1="${cy + 6}" x2="${cx + 16}" y2="${cy + 6}" stroke="${color}" stroke-width="2.4"/>
+        <line x1="${cx}" y1="${cy + 22}" x2="${cx - 13}" y2="${cy + 40}" stroke="${color}" stroke-width="2.4"/>
+        <line x1="${cx}" y1="${cy + 22}" x2="${cx + 13}" y2="${cy + 40}" stroke="${color}" stroke-width="2.4"/>
+        <text x="${cx}" y="${cy + 62}" text-anchor="middle" font-size="11.5" font-weight="800" fill="${P.fg}">${label}</text>
+      </g>
+    `;
+  }
+
+  // ---------- 1. MER ----------
+  function renderMER() {
+    return {
+      title: 'MER — Modelo Entidade-Relacionamento Completo (Notação Pé-de-Galinha)',
+      subtitle: '8 entidades • Chaves PK/FK • Cardinalidades 1:N, 1:0..1 e N:M',
+      legend: `
+        <span class="inline-flex items-center gap-1.5"><span style="background:${P.warning}" class="w-2.5 h-2.5 rounded-sm inline-block"></span> PK Chave Primária</span>
+        <span class="inline-flex items-center gap-1.5"><span style="background:${P.blue}" class="w-2.5 h-2.5 rounded-sm inline-block"></span> FK Chave Estrangeira</span>
+        <span class="mono" style="color:${P.primary}">||──&lt; 1:N</span>
+      `,
+      defaultNode: 'mer-item',
+      svg: `<svg viewBox="0 0 1260 850" width="1260" height="850" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <path d="M 300 165 L 385 165" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <rect x="318" y="142" width="48" height="18" rx="4" fill="${P.card}" stroke="${P.border}"/>
+        <text x="342" y="155" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.primary}">1 : N</text>
+
+        <path d="M 162 330 L 162 415" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-zero-one)"/>
+        <rect x="172" y="362" width="52" height="18" rx="4" fill="${P.card}" stroke="${P.border}"/>
+        <text x="198" y="375" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.primary}">1 : 0..1</text>
+
+        <path d="M 300 265 L 335 265 L 335 645 L 385 645" stroke="${P.purple}" stroke-width="2" stroke-dasharray="6 3" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+
+        <path d="M 805 190 L 905 190" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <rect x="816" y="167" width="76" height="18" rx="4" fill="${P.card}" stroke="${P.border}"/>
+        <text x="854" y="180" text-anchor="middle" font-size="10" font-weight="800" fill="${P.primary}">1:N (audita)</text>
+
+        <path d="M 595 520 L 595 585" stroke="${P.teal}" stroke-width="2.2" fill="none" marker-start="url(#crow-many)" marker-end="url(#crow-many)"/>
+        <rect x="606" y="542" width="112" height="18" rx="4" fill="${P.card}" stroke="${P.border}"/>
+        <text x="662" y="555" text-anchor="middle" font-size="10" font-weight="800" fill="${P.teal}">N : M (similaridade)</text>
+
+        <path d="M 905 360 L 805 360" stroke="${P.muted}" stroke-width="1.8" stroke-dasharray="5 3" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <text x="855" y="352" text-anchor="middle" font-size="10" font-weight="700" fill="${P.muted}">classifica</text>
+
+        <path d="M 1068 625 L 1068 670" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 905 525 L 848 525 L 848 465 L 805 465" stroke="${P.purple}" stroke-width="1.8" stroke-dasharray="5 3" fill="none" marker-end="url(#crow-many)"/>
+
+        ${erBox('mer-evento', 25, 32, 275, 'EVENTO', P.blue, [
+          { k: 'PK', n: 'id', t: 'fk_id_Eventos' },
+          { n: 'tipo', t: 'Assembleia|Congresso' },
+          { n: 'codigo', t: 'ES-005.27.1' },
+          { n: 'circuito / parte', t: 'ES-005 / A|B' },
+          { n: 'data', t: 'YYYY-MM-DD' },
+          { n: 'local', t: 'Salão Guarapari' },
+          { n: 'superintendente', t: 'string' },
+          { n: 'ajudantes', t: 'string' },
+          { n: 'voluntariosNec/Us', t: 'int / int' },
+          { n: 'proximaEtiqueta', t: 'int (auto)' },
+          { n: 'status', t: 'ativo | encerrado' },
+          { k: 'FK', n: 'deviceId', t: 'CONFIG_DISP' },
+        ])}
+
+        ${erBox('mer-item', 385, 22, 420, 'ITEM (Perdidos, Achados & Guarda-Volumes)', P.primary, [
+          { k: 'PK', n: 'id', t: 'Row ID / UUID' },
+          { k: 'FK', n: 'eventoId', t: 'EVENTO.id' },
+          { n: 'etiqueta / codigo', t: 'int / "#01 | B-01"' },
+          { n: 'etiquetaOrigem', t: 'string? (merge)' },
+          { n: 'formPagina', t: 'int (pág. papel)' },
+          { n: 'tipoItem / descricao', t: 'string / text' },
+          { n: 'valor', t: 'Baixo|Comum|Médio|Alto|Prec.' },
+          { n: 'categoria', t: 'Perdido|Guardado|Criança|...' },
+          { n: 'fotoEntrada', t: 'DataURL JPEG (Foto 1)' },
+          { n: 'etqItem / etqForm', t: 'boolean / boolean' },
+          { n: 'fotoEtiqueta', t: 'DataURL JPEG (Foto 2)' },
+          { n: 'fotoEntrega', t: 'DataURL JPEG (Foto 3)' },
+          { n: 'status', t: 'Guardado|Conf.|Entregue|DESP' },
+          { n: 'destino', t: 'DESCARTAR|DOAR|VENDER|CONTAS' },
+          { n: 'dataHoraGuardado', t: 'ISO-8601 (base 60d)' },
+          { n: 'quemTrouxe / local', t: 'string / string' },
+          { n: 'dataHoraDespachado', t: 'ISO-8601' },
+          { n: 'quemPegou / obs', t: 'string / string' },
+          { n: 'donoNomeTels', t: 'string (§58 GV)' },
+          { n: 'congregacao / end.', t: 'string / string' },
+          { k: 'FK', n: 'deviceId / Name', t: 'origem multi-disp.' },
+        ])}
+
+        ${erBox('mer-rastreio', 905, 32, 325, 'RASTREIO_EVENTO (Timeline)', P.success, [
+          { k: 'PK', n: 'id', t: 'trk_*' },
+          { k: 'FK', n: 'itemId', t: 'ITEM.id (array)' },
+          { n: 'timestamp', t: 'ISO-8601' },
+          { n: 'etapa', t: '12 etapas auditáveis' },
+          { n: 'titulo', t: 'string' },
+          { n: 'detalhes', t: 'text' },
+          { n: 'operador', t: 'Voluntário / SA' },
+          { n: 'dispositivo', t: 'Celular / PC' },
+          { n: 'localizacao', t: 'Mesa|Cofre|GV|Contas' },
+        ])}
+
+        ${erBox('mer-catalogo', 905, 305, 325, 'TIPO_ITEM_CATALOGO', P.teal, [
+          { k: 'PK', n: 'nome', t: '57 padrões + novos' },
+          { n: 'personalizado', t: 'boolean' },
+        ])}
+
+        ${erBox('mer-config', 905, 425, 325, 'CONFIG_DISPOSITIVO', P.purple, [
+          { k: 'PK', n: 'deviceId', t: 'UUID local' },
+          { n: 'deviceName / operador', t: 'string / string' },
+          { n: 'prefixoEtq / Inicial', t: '"B-" / 101' },
+          { n: 'prazoRetencaoDias', t: '60 (padrão)' },
+          { n: 'vozTTS / tema / fonte', t: 'acessibilidade' },
+          { n: 'autoMarcaDaguaEtq', t: 'boolean' },
+        ])}
+
+        ${erBox('mer-synclog', 905, 670, 325, 'SYNC_LOG (Auditoria Merge)', P.warning, [
+          { k: 'PK', n: 'id', t: 'sync_*' },
+          { n: 'timestamp / tipo', t: 'JSON | EXCEL | CSV' },
+          { n: 'origemDispositivo', t: 'string' },
+          { n: 'itensAdd / Atualiz.', t: 'int / int' },
+          { n: 'colisoesResolvidas', t: 'int' },
+        ])}
+
+        ${erBox('mer-relatorio', 25, 415, 275, 'RELATORIO_FINAL (PDF A4)', P.warning, [
+          { k: 'PK', n: 'id', t: 'rel_*' },
+          { k: 'FK', n: 'eventoId (UNIQUE)', t: 'EVENTO.id' },
+          { n: 'circuito / parte', t: 'ES-005 / A|B' },
+          { n: 'departamento', t: 'PA / Guarda-Vol.' },
+          { n: 'superint. / ajudantes', t: 'string' },
+          { n: 'volNec / volUsados', t: 'int / int' },
+          { n: 'difAntes / Dur. / Apos', t: 'bool + text' },
+          { n: 'sugestoes', t: 'text' },
+          { n: 'responsavel / cong.', t: 'string' },
+          { n: 'cidade / data / assin.', t: 'Guarapari/ES' },
+        ])}
+
+        ${erBox('mer-procurado', 385, 585, 420, 'ITEM_PROCURADO', P.teal, [
+          { k: 'PK', n: 'id', t: 'prc_*' },
+          { k: 'FK', n: 'eventoId', t: 'EVENTO.id' },
+          { n: 'nomeTelefone / cong.', t: 'solicitante' },
+          { n: 'descricao', t: 'texto de busca' },
+          { n: 'foto', t: 'DataURL (ref. WhatsApp)' },
+          { k: 'FK', n: 'provaveisItensIds[]', t: 'ITEM.id[] (N:M)' },
+          { n: 'status', t: 'PROCURANDO|LOCALIZADO|ENTREGUE' },
+        ])}
+      </svg>`
+    };
+  }
+
+  // ---------- 2. UML STATE MACHINE ----------
+  function renderStates() {
+    function stateNode(id, x, y, w, h, title, sub, color) {
+      return `
+        <g class="svg-node" data-node="${id}">
+          <rect class="node-frame" data-orig-stroke="${color}" data-orig-sw="2.2" x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="${P.card}" stroke="${color}" stroke-width="2.2"/>
+          <path d="M ${x+1} ${y+14} Q ${x+1} ${y+1} ${x+14} ${y+1} L ${x+w-14} ${y+1} Q ${x+w-1} ${y+1} ${x+w-1} ${y+14} L ${x+w-1} ${y+30} L ${x+1} ${y+30} Z" fill="${color}"/>
+          <text x="${x + w/2}" y="${y + 20}" text-anchor="middle" font-size="12" font-weight="800" fill="#ffffff">${title}</text>
+          <text x="${x + w/2}" y="${y + 51}" text-anchor="middle" font-size="11" font-weight="500" fill="${P.fg}">${sub}</text>
+        </g>
+      `;
+    }
+
+    return {
+      title: 'UML — Máquina de Estados do Ciclo de Vida do Item',
+      subtitle: 'Da entrada (Foto 1 → Etiqueta → Foto 2) até Entrega, Contas (§57) ou Destinação SA (≥60d)',
+      legend: `
+        <span class="inline-flex items-center gap-1"><span style="background:${P.blue}" class="w-2.5 h-2.5 rounded-full inline-block"></span> Recepção</span>
+        <span class="inline-flex items-center gap-1"><span style="background:${P.warning}" class="w-2.5 h-2.5 rounded-full inline-block"></span> Custódia / Retido</span>
+        <span class="inline-flex items-center gap-1"><span style="background:${P.success}" class="w-2.5 h-2.5 rounded-full inline-block"></span> Entregue</span>
+        <span class="inline-flex items-center gap-1"><span style="background:${P.error}" class="w-2.5 h-2.5 rounded-full inline-block"></span> Protocolo §56 / §55</span>
+      `,
+      defaultNode: 'st-guardado',
+      svg: `<svg viewBox="0 0 1210 720" width="1210" height="720" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <circle cx="52" cy="90" r="12" fill="${P.fg}"/>
+        <path d="M 64 90 L 114 90" stroke="${P.muted}" stroke-width="2.2" marker-end="url(#arrow)"/>
+
+        ${stateNode('st-recepcao', 120, 54, 255, 72, '1. Recepção + Foto 1', 'Colar Etiqueta #N no Item e Fotografar', P.blue)}
+        <path d="M 375 90 L 436 90" stroke="${P.primary}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <text x="405" y="80" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.primary}">Etq #N</text>
+
+        ${stateNode('st-etiqueta2', 442, 54, 290, 72, '2. Etiqueta Gêmea + Foto 2', 'Colar 2ª Etiqueta no Formulário (Pág. X)', P.teal)}
+
+        <path d="M 732 90 L 990 90 L 990 216" stroke="${P.success}" stroke-width="2.2" stroke-dasharray="6 3" fill="none" marker-end="url(#arrow-success)"/>
+        <text x="865" y="80" text-anchor="middle" font-size="11" font-weight="700" fill="${P.success}">Entrega imediata no ato</text>
+
+        <path d="M 587 126 L 587 180" stroke="${P.primary}" stroke-width="2.4" marker-end="url(#arrow-primary)"/>
+        <text x="665" y="158" font-size="10.5" font-weight="700" fill="${P.primary}">Salvar (RECEBIDO + ETIQUETADO)</text>
+
+        <!-- COMPOSITE STATE: AINDA GUARDADO -->
+        <g class="svg-node" data-node="st-guardado">
+          <rect class="node-frame" data-orig-stroke="${P.warning}" data-orig-sw="2.4" x="72" y="186" width="712" height="248" rx="18" fill="${P.content}" stroke="${P.warning}" stroke-width="2.4"/>
+          <path d="M 73 204 Q 73 187 90 187 L 766 187 Q 783 187 783 204 L 783 220 L 73 220 Z" fill="${P.warning}"/>
+          <text x="94" y="209" font-size="13" font-weight="800" fill="#ffffff">ESTADO COMPOSTO: Ainda Guardado (Custódia Ativa)</text>
+
+          <rect x="94" y="238" width="158" height="84" rx="10" fill="${P.card}" stroke="${P.blue}" stroke-width="1.8"/>
+          <text x="173" y="261" text-anchor="middle" font-size="12" font-weight="800" fill="${P.blue}">Mesa Exposição</text>
+          <text x="173" y="280" text-anchor="middle" font-size="10.5" fill="${P.fg}">Valor Baixo / Comum</text>
+          <text x="173" y="297" text-anchor="middle" font-size="10.5" fill="${P.muted}">ou Médio (§55)</text>
+
+          <rect x="266" y="238" width="162" height="84" rx="10" fill="${P.card}" stroke="${P.warning}" stroke-width="2"/>
+          <text x="347" y="261" text-anchor="middle" font-size="12" font-weight="800" fill="${P.warning}">Cofre / Restrito</text>
+          <text x="347" y="280" text-anchor="middle" font-size="10.5" fill="${P.fg}">Alto/Precioso, Bolsa,</text>
+          <text x="347" y="297" text-anchor="middle" font-size="10.5" font-weight="700" fill="${P.warning}">Celular • Não Expor §55</text>
+
+          <rect x="442" y="238" width="156" height="84" rx="10" fill="${P.card}" stroke="${P.primary}" stroke-width="1.8"/>
+          <text x="520" y="261" text-anchor="middle" font-size="12" font-weight="800" fill="${P.primary}">Prateleira GV</text>
+          <text x="520" y="280" text-anchor="middle" font-size="10.5" fill="${P.fg}">Categoria Guardado</text>
+          <text x="520" y="297" text-anchor="middle" font-size="10.5" fill="${P.muted}">Dados Dono (§58)</text>
+
+          <rect x="612" y="238" width="152" height="84" rx="10" fill="${P.card}" stroke="${P.error}" stroke-width="2.2"/>
+          <text x="688" y="261" text-anchor="middle" font-size="12" font-weight="800" fill="${P.error}">Pessoa Perdida</text>
+          <text x="688" y="280" text-anchor="middle" font-size="10.5" fill="${P.fg}">Criança/Idoso/Adulto</text>
+          <text x="688" y="297" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.error}">SEM MIC! (§56)</text>
+
+          <rect x="94" y="338" width="670" height="76" rx="10" fill="${P.card}" stroke="${P.border}" stroke-dasharray="5 3"/>
+          <text x="429" y="361" text-anchor="middle" font-size="11.5" font-weight="800" fill="${P.fg}">Ações disponíveis durante a custódia</text>
+          <text x="429" y="381" text-anchor="middle" font-size="10.5" fill="${P.muted}">• Imprimir Etiquetas Gêmeas   • Atualizar Fotos   • Vincular a Item Procurado   • Mesclar Mobile ↔ PC (TRANSFERIDO)</text>
+          <text x="429" y="399" text-anchor="middle" font-size="10.5" fill="${P.muted}">• Busca instantânea por voz ou texto ("Buscar garrafa", "Filtrar guardados")</text>
+        </g>
+
+        ${stateNode('st-conferencia', 865, 362, 255, 72, 'Em Conferência', 'Validando descrição / Match Procurado', P.purple)}
+        <path d="M 784 390 L 860 390" stroke="${P.purple}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <path d="M 865 415 L 788 415" stroke="${P.muted}" stroke-width="1.8" stroke-dasharray="4 3" marker-end="url(#arrow)"/>
+        <text x="824" y="382" text-anchor="middle" font-size="10" font-weight="700" fill="${P.purple}">Separar</text>
+        <text x="824" y="429" text-anchor="middle" font-size="9.5" fill="${P.muted}">Não conferiu</text>
+
+        ${stateNode('st-entregue', 865, 222, 255, 74, 'Já Entregue', 'Foto 3 + Quem Pegou + Dados Dono', P.success)}
+        <path d="M 784 258 L 860 258" stroke="${P.success}" stroke-width="2.4" marker-end="url(#arrow-success)"/>
+        <text x="822" y="248" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.success}">Entregar</text>
+        <path d="M 992 362 L 992 300" stroke="${P.success}" stroke-width="2.4" marker-end="url(#arrow-success)"/>
+        <text x="1038" y="335" font-size="10.5" font-weight="800" fill="${P.success}">Confirmado</text>
+
+        <path d="M 940 222 L 940 154 L 700 154 L 700 182" stroke="${P.muted}" stroke-width="1.6" stroke-dasharray="4 3" fill="none" marker-end="url(#arrow)"/>
+        <text x="820" y="146" text-anchor="middle" font-size="10" fill="${P.muted}">Reabertura auditada (REABERTO)</text>
+
+        ${stateNode('st-contas', 72, 535, 260, 74, 'Entregue Depto. Contas', 'Dinheiro não retirado (§57)', P.blue)}
+        <path d="M 202 434 L 202 530" stroke="${P.blue}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <text x="212" y="488" font-size="10.5" font-weight="700" fill="${P.blue}">Se Dinheiro ao fim (§57)</text>
+
+        ${stateNode('st-retido', 410, 535, 280, 74, 'Retido (≥ 60 dias)', 'Elegível no Deck Destinar (SA)', P.warning)}
+        <path d="M 550 434 L 550 530" stroke="${P.warning}" stroke-width="2.4" marker-end="url(#arrow-warning)"/>
+        <text x="560" y="488" font-size="10.5" font-weight="700" fill="${P.warning}">Permanência ≥ 60 dias</text>
+
+        <path d="M 690 554 L 822 554 L 822 280 L 860 280" stroke="${P.success}" stroke-width="1.8" stroke-dasharray="5 3" fill="none" marker-end="url(#arrow-success)"/>
+        <text x="756" y="546" text-anchor="middle" font-size="10" font-weight="700" fill="${P.success}">Dono tardio</text>
+
+        ${stateNode('st-despachado', 855, 535, 275, 74, 'DESPACHADO (SA)', 'DOAR | VENDER (Circuito) | DESCARTAR', P.muted)}
+        <path d="M 690 578 L 850 578" stroke="${P.primary}" stroke-width="2.4" marker-end="url(#arrow-primary)"/>
+        <text x="770" y="596" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.primary}">Decisão SA</text>
+
+        <circle cx="1168" cy="259" r="11" fill="none" stroke="${P.fg}" stroke-width="2"/><circle cx="1168" cy="259" r="6" fill="${P.fg}"/>
+        <path d="M 1120 259 L 1152 259" stroke="${P.muted}" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <circle cx="1168" cy="572" r="11" fill="none" stroke="${P.fg}" stroke-width="2"/><circle cx="1168" cy="572" r="6" fill="${P.fg}"/>
+        <path d="M 1130 572 L 1152 572" stroke="${P.muted}" stroke-width="2" marker-end="url(#arrow)"/>
+
+        <circle cx="202" cy="660" r="11" fill="none" stroke="${P.fg}" stroke-width="2"/><circle cx="202" cy="660" r="6" fill="${P.fg}"/>
+        <path d="M 202 609 L 202 644" stroke="${P.muted}" stroke-width="2" marker-end="url(#arrow)"/>
+      </svg>`
+    };
+  }
+
+  // ---------- 3. UML USE CASES ----------
+  function renderUseCases() {
+    const ucs = [
+      { id: 'UC01', x: 380, y: 105, txt: 'UC01 • Selecionar / Criar Evento', node: 'uc-vol' },
+      { id: 'UC02', x: 380, y: 178, txt: 'UC02 • Cadastrar (Foto 1→Etq→Foto 2)', node: 'uc-vol' },
+      { id: 'UC03', x: 380, y: 251, txt: 'UC03 • Registrar Guarda-Volumes (§58)', node: 'uc-vol' },
+      { id: 'UC04', x: 380, y: 324, txt: 'UC04 • Protocolo Criança/Pessoa (§56)', node: 'uc-vol' },
+      { id: 'UC05', x: 380, y: 397, txt: 'UC05 • Comandos & Ditado por Voz (pt-BR)', node: 'uc-vol' },
+      { id: 'UC06', x: 380, y: 470, txt: 'UC06 • Buscar, Filtrar & Conferir (§55)', node: 'uc-vol' },
+      { id: 'UC07', x: 380, y: 543, txt: 'UC07 • Entregar + Foto 3 + Rastreio', node: 'uc-vol' },
+
+      { id: 'UC08', x: 760, y: 135, txt: 'UC08 • Cadastrar & Cruzar Procurados', node: 'uc-vol' },
+      { id: 'UC09', x: 760, y: 215, txt: 'UC09 • Imprimir Etiquetas Gêmeas', node: 'uc-vol' },
+      { id: 'UC10', x: 760, y: 295, txt: 'UC10 • Encaminhar Dinheiro Contas (§57)', node: 'uc-enc' },
+      { id: 'UC11', x: 760, y: 375, txt: 'UC11 • Destinar Retidos ≥60d (Deck SA)', node: 'uc-sa' },
+      { id: 'UC12', x: 760, y: 455, txt: 'UC12 • Emitir & Imprimir Relatório A4', node: 'uc-enc' },
+      { id: 'UC13', x: 760, y: 535, txt: 'UC13 • Importar / Exportar Excel (.xlsx)', node: 'uc-enc' },
+      { id: 'UC14', x: 760, y: 615, txt: 'UC14 • Exportar & Mesclar Dispositivos', node: 'uc-dev' },
+    ];
+    const ucById = Object.fromEntries(ucs.map(u => [u.id, u]));
+    const links = [
+      ...['UC01','UC02','UC03','UC04','UC05','UC06','UC07'].map(u => ({ x1: 148, y1: 195, u, c: P.blue })),
+      ...['UC01','UC06','UC10','UC12','UC13','UC14'].map(u => ({ x1: 148, y1: 425, u, c: P.primary })),
+      ...['UC03','UC06','UC07','UC08'].map(u => ({ x1: 148, y1: 605, u, c: P.success, dash: true })),
+      ...['UC11','UC12'].map(u => ({ x1: 1022, y1: 290, u, c: P.warning, right: true })),
+      ...['UC14'].map(u => ({ x1: 1022, y1: 560, u, c: P.purple, right: true })),
+    ];
+
+    return {
+      title: 'UML — Diagrama de Casos de Uso Granulares',
+      subtitle: '5 atores • 14 casos de uso principais cobrindo todo o escopo operacional',
+      legend: `
+        <span style="color:${P.blue}">● Voluntário</span>
+        <span style="color:${P.primary}">● Encarregado</span>
+        <span style="color:${P.warning}">● SA</span>
+        <span style="color:${P.success}">● Dono</span>
+        <span style="color:${P.purple}">● Outro Equip.</span>
+      `,
+      defaultNode: 'uc-vol',
+      svg: `<svg viewBox="0 0 1190 700" width="1190" height="700" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <rect x="206" y="28" width="768" height="644" rx="20" fill="${P.content}" stroke="${P.border}" stroke-width="2"/>
+        <text x="590" y="58" text-anchor="middle" font-size="14" font-weight="800" fill="${P.fg}">Sistema: PWA Perdidos e Achados &amp; Guarda-Volumes (Offline-First)</text>
+
+        ${links.map(l => {
+          const t = ucById[l.u];
+          const x2 = l.right ? t.x + 158 : t.x - 158;
+          return `<line x1="${l.x1}" y1="${l.y1}" x2="${x2}" y2="${t.y}" stroke="${l.c}" stroke-width="1.8" stroke-opacity="0.72" ${l.dash ? 'stroke-dasharray="5 3"' : ''}/>`;
+        }).join('')}
+
+        ${ucs.map(u => `
+          <g class="svg-node" data-node="${u.node}">
+            <ellipse class="node-frame" data-orig-stroke="${P.primary}" data-orig-sw="1.8" cx="${u.x}" cy="${u.y}" rx="158" ry="26" fill="${P.card}" stroke="${P.primary}" stroke-width="1.8"/>
+            <text x="${u.x}" y="${u.y + 4}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${P.fg}">${u.txt}</text>
+          </g>
+        `).join('')}
+
+        ${stickActor('uc-vol', 90, 195, 'Voluntário', P.blue)}
+        ${stickActor('uc-enc', 90, 425, 'Encarregado', P.primary)}
+        ${stickActor('uc-dono', 90, 605, 'Dono / Solic.', P.success)}
+        ${stickActor('uc-sa', 1082, 290, 'Superint. (SA)', P.warning)}
+        ${stickActor('uc-dev', 1082, 560, 'Outro Mobile/PC', P.purple)}
+      </svg>`
+    };
+  }
+
+  // ---------- 4. UML CLASSES ----------
+  function renderClasses() {
+    return {
+      title: 'UML — Diagrama de Classes (Domínio & Serviços Puros)',
+      subtitle: 'Arquitetura desacoplada: Entidades tipadas + 6 serviços puros testados via Vitest',
+      legend: `<span style="color:${P.primary}">◆── Composição</span><span style="color:${P.muted}">- - -&gt; Dependência</span>`,
+      defaultNode: 'cls-merge',
+      svg: `<svg viewBox="0 0 1250 770" width="1250" height="770" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <path d="M 360 120 L 420 120" stroke="${P.primary}" stroke-width="2" marker-start="url(#diamond)" marker-end="url(#arrow-primary)"/>
+        <path d="M 192 252 L 192 308" stroke="${P.primary}" stroke-width="2" marker-start="url(#diamond)" marker-end="url(#arrow-primary)"/>
+        <path d="M 745 140 L 815 140" stroke="${P.primary}" stroke-width="2" marker-start="url(#diamond)" marker-end="url(#arrow-primary)"/>
+
+        <path d="M 192 510 L 192 478" stroke="${P.muted}" stroke-width="1.7" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+        <path d="M 580 510 L 580 398" stroke="${P.muted}" stroke-width="1.7" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+        <path d="M 980 510 L 980 310" stroke="${P.muted}" stroke-width="1.7" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+
+        ${umlClassBox('cls-db', 28, 30, 332, 'Aggregate Root', 'AppDatabase', P.primary, [
+          '+ schemaVersion: number',
+          '+ activeEventoId: string | null',
+          '+ config: ConfiguracaoDispositivo',
+          '+ eventos: Evento[]',
+          '+ itens: Item[]',
+          '+ procurados: ItemProcurado[]',
+          '+ relatorios: RelatorioFinal[]',
+          '+ syncHistory: SyncLogEntry[]',
+        ], ['localStorage["assembleia_pa_db_v1"]'])}
+
+        ${umlClassBox('mer-item', 425, 30, 320, 'Entity', 'Item', P.blue, [
+          '+ id: string (Row ID)',
+          '+ eventoId: string',
+          '+ etiqueta / etiquetaCodigo',
+          '+ formPagina: number',
+          '+ tipoItem / descricao: string',
+          '+ valor: ValorItem',
+          '+ categoria: CategoriaItem',
+          '+ fotoEntrada / fotoEtiqueta / fotoEntrega',
+          '+ status: StatusItem / destino: DestinoSA',
+          '+ rastreio: RastreioEvento[]',
+          '+ deviceId / deviceName / etiquetaOrigem',
+        ], [
+          '+ isRestrictedDisplay(): boolean',
+          '+ isItemRetido(prazoDias): boolean',
+          '+ buildLegacyDesc(): string',
+        ])}
+
+        ${umlClassBox('mer-rastreio', 820, 30, 400, 'Value Object • Immutable', 'RastreioEvento', P.success, [
+          '+ id: string',
+          '+ timestamp: string (ISO-8601)',
+          '+ etapa: EtapaRastreio (12 etapas)',
+          '+ titulo: string',
+          '+ detalhes: string',
+          '+ operador: string',
+          '+ dispositivo: string',
+          '+ localizacao?: string',
+        ], ['+ createTrackingEvent(params): RastreioEvento'])}
+
+        ${umlClassBox('mer-evento', 28, 312, 332, 'Entity', 'Evento & RelatorioFinal', P.warning, [
+          '+ id / tipo / codigo / circuito / parte',
+          '+ data / local / proximaEtiqueta',
+          '+ dificuldadeAntes / Durante / Apos',
+          '+ voluntariosNecessarios / Usados',
+        ], ['+ getNextTagForEvent(eventoId)'])}
+
+        ${umlClassBox('cls-storage', 28, 515, 290, 'Service', 'StorageService', P.purple, [
+          '+ STORAGE_KEY: string',
+        ], [
+          '+ loadDatabase(): AppDatabase',
+          '+ saveDatabase(db): SaveResult',
+          '+ getStorageUsage(): QuotaInfo',
+          '+ createDemoSeedData(cfg): Seed',
+        ])}
+
+        ${umlClassBox('cls-tracking', 338, 515, 295, 'Domain Service', 'TrackingService', P.success, [
+          'Regras §55, §56, §57, §58',
+        ], [
+          '+ transitionItemToConference()',
+          '+ transitionItemToDelivered()',
+          '+ transitionItemToDispatchedSA()',
+          '+ transitionItemReopen()',
+        ])}
+
+        ${umlClassBox('cls-merge', 653, 515, 285, 'Sync Service', 'MergeService', P.purple, [
+          'format: ASSEMBLEIA_PA_SYNC_V1',
+        ], [
+          '+ buildSyncBundle(db, scope)',
+          '+ parseSyncBundle(jsonText)',
+          '+ previewMerge(localDb, bundle)',
+          '+ executeMerge(localDb, bundle)',
+        ])}
+
+        ${umlClassBox('cls-voice', 958, 355, 265, 'Accessibility', 'Voice & PhotoService', P.teal, [
+          'Web Speech (pt-BR) + Canvas',
+        ], [
+          '+ parseVoiceCommand(raw)',
+          '+ parseSpokenItemFields(raw)',
+          '+ speakPtBr(text, enabled)',
+          '+ compressImageFile(file)',
+        ])}
+
+        ${umlClassBox('cls-excel', 958, 540, 265, 'Adapter', 'ExcelService (SheetJS)', P.warning, [
+          '25 colunas Excel / CSV',
+        ], [
+          '+ importFromSpreadsheetBuffer()',
+          '+ exportToSpreadsheet(db, fmt)',
+        ])}
+      </svg>`
+    };
+  }
+
+  // ---------- 5. UML SEQUENCES ----------
+  let activeSeq = 'intake';
+
+  function buildSequenceSvg(lifelines, messages, noteBox) {
+    const W = 1200;
+    const stepH = 56;
+    const startY = 120;
+    const H = startY + messages.length * stepH + 78;
+    const spacing = (W - 180) / (lifelines.length - 1);
+    const xs = lifelines.map((_, i) => Math.round(90 + i * spacing));
+
+    const headerSvg = lifelines.map((l, i) => `
+      <g class="svg-node" data-node="${l.node}">
+        <rect class="node-frame" data-orig-stroke="${l.c}" data-orig-sw="2" x="${xs[i] - 80}" y="22" width="160" height="48" rx="10" fill="${P.card}" stroke="${l.c}" stroke-width="2"/>
+        <path d="M ${xs[i]-79} 32 Q ${xs[i]-79} 23 ${xs[i]-70} 23 L ${xs[i]+70} 23 Q ${xs[i]+79} 23 ${xs[i]+79} 32 L ${xs[i]+79} 48 L ${xs[i]-79} 48 Z" fill="${l.c}"/>
+        <text x="${xs[i]}" y="40" text-anchor="middle" font-size="11.5" font-weight="800" fill="#ffffff">${l.title}</text>
+        <text x="${xs[i]}" y="62" text-anchor="middle" font-size="10" font-weight="600" fill="${P.muted}">${l.sub}</text>
+        <line x1="${xs[i]}" y1="70" x2="${xs[i]}" y2="${H - 58}" stroke="${P.border}" stroke-width="2" stroke-dasharray="6 4"/>
+      </g>
+    `).join('');
+
+    const msgSvg = messages.map((m, idx) => {
+      const y = startY + idx * stepH;
+      const x1 = xs[m.from];
+      const x2 = xs[m.to];
+      const c = m.c || P.primary;
+      if (m.from === m.to) {
+        return `
+          <rect x="${x1 - 6}" y="${y - 12}" width="12" height="32" rx="3" fill="${c}" fill-opacity="0.22" stroke="${c}" stroke-width="1.5"/>
+          <path d="M ${x1 + 6} ${y - 6} L ${x1 + 54} ${y - 6} L ${x1 + 54} ${y + 14} L ${x1 + 10} ${y + 14}" fill="none" stroke="${c}" stroke-width="2" marker-end="url(#arrow-primary)"/>
+          <rect x="${x1 + 62}" y="${y - 8}" width="${Math.min(460, m.label.length * 6.9 + 28)}" height="22" rx="6" fill="${P.card}" stroke="${P.border}"/>
+          <text x="${x1 + 72}" y="${y + 7}" font-size="11" font-weight="700" fill="${P.fg}">${idx + 1}. ${m.label}</text>
+        `;
+      }
+      const midX = (x1 + x2) / 2;
+      const pillW = Math.min(490, m.label.length * 6.8 + 34);
+      return `
+        <rect x="${x2 - 5}" y="${y - 10}" width="10" height="24" rx="2" fill="${c}" fill-opacity="0.22" stroke="${c}" stroke-width="1.4"/>
+        <line x1="${x1}" y1="${y}" x2="${x2 + (x2 > x1 ? -8 : 8)}" y2="${y}" stroke="${c}" stroke-width="2.2" ${m.ret ? 'stroke-dasharray="6 3"' : ''} marker-end="url(#arrow-primary)"/>
+        <rect x="${midX - pillW / 2}" y="${y - 26}" width="${pillW}" height="20" rx="6" fill="${P.card}" stroke="${P.border}"/>
+        <circle cx="${midX - pillW / 2 + 12}" cy="${y - 16}" r="8" fill="${c}"/>
+        <text x="${midX - pillW / 2 + 12}" y="${y - 12.5}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#ffffff">${idx + 1}</text>
+        <text x="${midX + 8}" y="${y - 12}" text-anchor="middle" font-size="11" font-weight="${m.ret ? '600' : '700'}" fill="${P.fg}">${m.label}</text>
+      `;
+    }).join('');
+
+    const noteSvg = noteBox ? `
+      <rect x="40" y="${H - 52}" width="${W - 80}" height="36" rx="10" fill="${P.content}" stroke="${P.warning}" stroke-width="1.8"/>
+      <text x="${W / 2}" y="${H - 30}" text-anchor="middle" font-size="11.5" font-weight="700" fill="${P.fg}">${noteBox}</text>
+    ` : '';
+
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">${svgDefs()}${headerSvg}${msgSvg}${noteSvg}</svg>`;
+  }
+
+  function renderSequence() {
+    if (activeSeq === 'intake') {
+      return {
+        title: 'UML Sequência A — Recepção com Voz (pt-BR) + Foto 1 → Etiqueta → Foto 2',
+        subtitle: 'Cadastro ergonômico do balcão com compressão automática e alertas §55–58',
+        legend: '<span>Contínuas = chamada • Tracejadas = retorno</span>',
+        defaultNode: 'cls-voice',
+        svg: buildSequenceSvg(
+          [
+            { title: 'Voluntário', sub: 'Ator Balcão', c: P.blue, node: 'uc-vol' },
+            { title: 'VoiceService', sub: 'Web Speech pt-BR', c: P.teal, node: 'cls-voice' },
+            { title: 'ItemFormModal', sub: 'UI + Regras §55-58', c: P.primary, node: 'mer-item' },
+            { title: 'PhotoService', sub: 'Canvas ~40KB', c: P.warning, node: 'cls-photo' },
+            { title: 'TrackingService', sub: 'Ciclo de Vida', c: P.success, node: 'cls-tracking' },
+            { title: 'localStorage', sub: 'StorageService', c: P.purple, node: 'cls-storage' },
+          ],
+          [
+            { from: 0, to: 1, label: 'Fala "Novo item" (Alt+V)', c: P.teal },
+            { from: 1, to: 2, label: 'OPEN_NEW_ITEM + Próxima Etiqueta #N', c: P.primary },
+            { from: 0, to: 1, label: 'Dita "Celular Samsung verde, valor alto, quem trouxe Ana no auditório"', c: P.teal },
+            { from: 1, to: 2, label: 'parseSpokenItemFields() → preenche 5 campos + alerta §55', ret: true, c: P.warning },
+            { from: 0, to: 3, label: 'Captura Foto 1 (Item com Etiqueta #N colada)', c: P.warning },
+            { from: 3, to: 2, label: 'JPEG comprimido + carimbo "ETQ #N" + check etiquetaNoItem', ret: true, c: P.warning },
+            { from: 0, to: 3, label: 'Cola 2ª etiqueta no Formulário (Pág. X) e captura Foto 2', c: P.warning },
+            { from: 3, to: 2, label: 'JPEG Foto 2 + check etiquetaNoForm confirmado', ret: true, c: P.warning },
+            { from: 2, to: 4, label: 'Gera eventos RECEBIDO, ETIQUETADO e FOTO_REGISTRADA', c: P.success },
+            { from: 4, to: 5, label: 'saveDatabase() + incrementa proximaEtiqueta + TTS', c: P.purple },
+          ],
+          'Política §56: Se categoria = Criança/Idoso/Adulto, alerta crítico proíbe anúncio no microfone e instrui avisar Indicadores, SA e SC.'
+        )
+      };
+    }
+
+    if (activeSeq === 'delivery') {
+      return {
+        title: 'UML Sequência B — Busca, Conferência (§55) e Entrega ao Dono com Rastreio',
+        subtitle: 'Validação de características, atualização de Itens Procurados e Foto 3',
+        legend: '<span>Trilha cronológica imutável de custódia</span>',
+        defaultNode: 'cls-tracking',
+        svg: buildSequenceSvg(
+          [
+            { title: 'Dono / Solic.', sub: 'Ator Externo', c: P.success, node: 'uc-dono' },
+            { title: 'Voluntário', sub: 'Balcão', c: P.blue, node: 'uc-vol' },
+            { title: 'ItemsListView', sub: 'Busca / Filtros', c: P.primary, node: 'mer-item' },
+            { title: 'ItemDetailModal', sub: 'Conferência/Entrega', c: P.warning, node: 'st-conferencia' },
+            { title: 'TrackingService', sub: 'State Machine', c: P.success, node: 'cls-tracking' },
+            { title: 'AppStore + LS', sub: 'Persistência', c: P.purple, node: 'cls-storage' },
+          ],
+          [
+            { from: 0, to: 1, label: 'Relata perda e descreve detalhes do item (§55)', c: P.success },
+            { from: 1, to: 2, label: 'Busca por voz ("Buscar celular") ou texto', c: P.primary },
+            { from: 2, to: 3, label: 'Abre ETQ #02 (Badge Cofre / Não Expor §55)', c: P.warning },
+            { from: 3, to: 4, label: 'Opcional: transitionItemToConference() → Em Conferência', c: P.purple },
+            { from: 0, to: 1, label: 'Confirma identidade/desbloqueio e informa Nome, Tel., Congregação', c: P.success },
+            { from: 1, to: 3, label: 'Preenche entrega (por voz ou texto) + captura Foto 3 opcional', c: P.primary },
+            { from: 3, to: 4, label: 'transitionItemToDelivered() → gera evento ENTREGUE', c: P.success },
+            { from: 4, to: 5, label: 'Atualiza Item = Já Entregue e Procurado vinculado = ENTREGUE', c: P.purple },
+          ],
+          'Política §57: Se for Dinheiro não retirado até o fim do evento, "Entregar Depto. Contas" grava etapa ENTREGUE_CONTAS.'
+        )
+      };
+    }
+
+    return {
+      title: 'UML Sequência C — Exportação e Mesclagem Multi-Dispositivo (Mobile ↔ PC)',
+      subtitle: 'Juntar itens de vários aparelhos com unificação de evento e resolução de colisões',
+      legend: '<span>Zero perda de fotos • Preserva etiquetaOrigem no rastreio</span>',
+      defaultNode: 'cls-merge',
+      svg: buildSequenceSvg(
+        [
+          { title: 'Celular B', sub: 'Voluntário 2', c: P.purple, node: 'uc-dev' },
+          { title: 'Web Share / JSON', sub: 'WhatsApp / BT / USB', c: P.warning, node: 'mer-synclog' },
+          { title: 'PC / Mobile A', sub: 'Encarregado', c: P.blue, node: 'uc-enc' },
+          { title: 'MergeService', sub: 'Preview + Execute', c: P.primary, node: 'cls-merge' },
+          { title: 'localStorage A', sub: 'Base Consolidada', c: P.success, node: 'cls-storage' },
+        ],
+        [
+          { from: 0, to: 1, label: 'buildSyncBundle() → PA_Sync_ES-005_CelularB.json (fotos base64)', c: P.purple },
+          { from: 1, to: 2, label: 'Arquivo recebido via WhatsApp / Bluetooth / Cabo / Drive', c: P.warning },
+          { from: 2, to: 3, label: 'Importar & Mesclar → parseSyncBundle() + previewMerge()', c: P.primary },
+          { from: 3, to: 3, label: 'Unifica evento por (codigo + data) e detecta colisões de etiqueta', c: P.warning },
+          { from: 3, to: 2, label: 'Exibe MergePreview (+novos itens, colisões, conflitos ID)', ret: true, c: P.primary },
+          { from: 2, to: 3, label: 'Escolhe estratégia ("Renumerar" ou "Prefixo") e confirma', c: P.success },
+          { from: 3, to: 3, label: 'Renumera sem invadir tags livres, salva etiquetaOrigem e une rastreio[]', c: P.success },
+          { from: 3, to: 4, label: 'Persiste base unificada + registra SyncLogEntry', c: P.success },
+        ],
+        'Renumeração segura: se Celular B tinha Etq #01 (colidiu) e Etq #02 (livre), #01 pula para #03 preservando #02 intacta!'
+      )
+    };
+  }
+
+  // ---------- 6. UML COMPONENTS ----------
+  function renderComponents() {
+    function compBox(id, x, y, w, h, stereo, title, lines, color) {
+      return `
+        <g class="svg-node" data-node="${id}">
+          <rect class="node-frame" data-orig-stroke="${color}" data-orig-sw="2" x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${P.card}" stroke="${color}" stroke-width="2"/>
+          <path d="M ${x+1} ${y+12} Q ${x+1} ${y+1} ${x+12} ${y+1} L ${x+w-12} ${y+1} Q ${x+w-1} ${y+1} ${x+w-1} ${y+12} L ${x+w-1} ${y+44} L ${x+1} ${y+44} Z" fill="${color}"/>
+          <rect x="${x - 8}" y="${y + 12}" width="16" height="9" rx="2" fill="${P.card}" stroke="${color}" stroke-width="1.8"/>
+          <rect x="${x - 8}" y="${y + 27}" width="16" height="9" rx="2" fill="${P.card}" stroke="${color}" stroke-width="1.8"/>
+          <text x="${x + 18}" y="${y + 18}" font-size="9.5" fill="rgba(255,255,255,0.85)">«${stereo}»</text>
+          <text x="${x + 18}" y="${y + 36}" font-size="12.5" font-weight="800" fill="#ffffff">${title}</text>
+          ${lines.map((l, i) => `<text x="${x + 16}" y="${y + 66 + i * 18}" font-size="11" fill="${P.fg}">• ${l}</text>`).join('')}
+        </g>
+      `;
+    }
+
+    return {
+      title: 'UML — Diagrama de Componentes & Implantação PWA (Offline-First)',
+      subtitle: 'Execução 100% client-side em PC, Android e iOS — hospedado em HTTPS no GitHub Pages',
+      legend: '<span>Arquitetura em 4 camadas + Web APIs nativas</span>',
+      defaultNode: 'cmp-pwa',
+      svg: `<svg viewBox="0 0 1190 690" width="1190" height="690" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <rect x="24" y="20" width="1142" height="650" rx="18" fill="${P.content}" stroke="${P.border}" stroke-width="2"/>
+        <text x="48" y="48" font-size="13.5" font-weight="800" fill="${P.fg}">«Device Node» PC (Windows/Mac/Linux) • Android Chrome • iOS Safari (Standalone PWA)</text>
+
+        <path d="M 334 142 L 396 142" stroke="${P.primary}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <path d="M 764 142 L 826 142" stroke="${P.primary}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <path d="M 580 220 L 580 272" stroke="${P.primary}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <path d="M 970 220 L 970 272" stroke="${P.primary}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+        <path d="M 220 452 L 220 506" stroke="${P.success}" stroke-width="2.2" marker-end="url(#arrow-success)"/>
+        <path d="M 588 452 L 588 506" stroke="${P.warning}" stroke-width="2.2" marker-end="url(#arrow-warning)"/>
+        <path d="M 960 452 L 960 506" stroke="${P.teal}" stroke-width="2.2" marker-end="url(#arrow-primary)"/>
+
+        ${compBox('cmp-pwa', 56, 74, 278, 146, 'PWA Runtime', 'Workbox SW + Manifest', [
+          'Pré-cache offline (69 assets)',
+          'Ícones 192 / 512 / Apple Touch',
+          'Prompt nativo de instalação',
+        ], P.blue)}
+
+        ${compBox('cmp-ui', 402, 74, 362, 146, 'Presentation Layer', 'React 19 + Tailwind CSS v4', [
+          '7 Views + 2 Modais (Foto-Etiqueta-Foto)',
+          'VoiceAssistant HUD + VoiceInput',
+          'Print A4 oficial + Alto Contraste',
+        ], P.primary)}
+
+        ${compBox('cmp-store', 832, 74, 300, 146, 'State Management', 'AppProvider Store', [
+          'Persistência reativa automática',
+          'Filtros compartilhados UI ↔ Voz',
+          'Toasts + TTS Feedback falado',
+        ], P.purple)}
+
+        ${compBox('cls-tracking', 56, 278, 332, 174, 'Domain Engine', 'Tracking & StorageService', [
+          'Máquina de estados + Rastreio',
+          'Regras §55, §56, §57 (60d), §58',
+          'Serialização segura localStorage',
+          'Medidor de cota KB / MB / %',
+        ], P.success)}
+
+        ${compBox('cls-merge', 422, 278, 332, 174, 'Interoperability', 'Merge & ExcelService', [
+          'Export/Import SyncBundle JSON V1',
+          'Resolução inteligente de colisões',
+          'SheetJS: 25 cols Excel / CSV',
+          'União cronológica de rastreio',
+        ], P.warning)}
+
+        ${compBox('cls-voice', 788, 278, 344, 174, 'Multimodal Engine', 'Voice & PhotoService', [
+          'Parser NLP pt-BR (comandos/form)',
+          'SpeechRecognition + TTS',
+          'Canvas JPEG ≤900px (~40KB)',
+          'Carimbo automático Etiqueta/Hora',
+        ], P.teal)}
+
+        ${compBox('cmp-apis', 56, 512, 332, 130, 'Storage API', 'Browser localStorage', [
+          'Chave: assembleia_pa_db_v1',
+          '100% local, zero servidor',
+        ], P.success)}
+
+        ${compBox('cmp-apis', 422, 512, 332, 130, 'Transfer & Print', 'Web Share / File / Print', [
+          'Envio WhatsApp / Bluetooth / Drive',
+          'Impressão A4 PDF e Etiquetas',
+        ], P.warning)}
+
+        ${compBox('cmp-apis', 788, 512, 344, 130, 'Device Hardware', 'Camera & Microphone APIs', [
+          'capture="environment" (traseira)',
+          'Microfone pt-BR + Fallback Ctrl+K',
+        ], P.teal)}
+      </svg>`
+    };
+  }
+
+  // ---------- CONTROLLER ----------
+  let activeTab = 'mer';
+  let scale = 1, panX = 0, panY = 0;
+  let dragging = false, startX = 0, startY = 0;
+
+  const viewport = document.getElementById('viewport');
+  const svgHost = document.getElementById('svg-host');
+  const zoomReadout = document.getElementById('zoom-readout');
+
+  function applyTransform() {
+    const svg = svgHost.querySelector('svg');
+    if (!svg) return;
+    svg.style.transformOrigin = '0 0';
+    svg.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    zoomReadout.textContent = `${Math.round(scale * 100)}%`;
+  }
+
+  function fitToViewport() {
+    const svg = svgHost.querySelector('svg');
+    if (!svg) return;
+    const vb = svg.viewBox.baseVal;
+    const rect = viewport.getBoundingClientRect();
+    if (!vb.width || !rect.width) return;
+    const sx = (rect.width - 24) / vb.width;
+    const sy = (rect.height - 24) / vb.height;
+    scale = Math.max(0.55, Math.min(1.15, Math.min(sx, sy)));
+    panX = Math.max(12, (rect.width - vb.width * scale) / 2);
+    panY = Math.max(12, (rect.height - vb.height * scale) / 2);
+    applyTransform();
+  }
+
+  function renderCurrent() {
+    applyChromeTheme();
+    const map = {
+      mer: renderMER,
+      states: renderStates,
+      usecases: renderUseCases,
+      classes: renderClasses,
+      sequence: renderSequence,
+      components: renderComponents,
+    };
+    const res = map[activeTab]();
+    document.getElementById('stage-title').textContent = res.title;
+    document.getElementById('stage-subtitle').textContent = res.subtitle;
+    document.getElementById('stage-legend').innerHTML = res.legend;
+    svgHost.innerHTML = res.svg;
+
+    document.getElementById('seq-subtabs').classList.toggle('hidden', activeTab !== 'sequence');
+
+    svgHost.querySelectorAll('.svg-node').forEach(node => {
+      node.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showInspector(node.getAttribute('data-node'));
+      });
+    });
+
+    requestAnimationFrame(() => {
+      fitToViewport();
+      showInspector(res.defaultNode);
+    });
+  }
+
+  // Events
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('data-active', String(b === btn)));
+      renderCurrent();
+    });
+  });
+
+  document.querySelectorAll('.subtab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeSeq = btn.getAttribute('data-seq');
+      document.querySelectorAll('.subtab-btn').forEach(b => b.setAttribute('data-active', String(b === btn)));
+      renderCurrent();
+    });
+  });
+
+  document.getElementById('zoom-in').addEventListener('click', () => { scale = Math.min(2.4, scale + 0.15); applyTransform(); });
+  document.getElementById('zoom-out').addEventListener('click', () => { scale = Math.max(0.35, scale - 0.15); applyTransform(); });
+  document.getElementById('zoom-100').addEventListener('click', () => { scale = 1; panX = 16; panY = 16; applyTransform(); });
+  document.getElementById('zoom-fit').addEventListener('click', fitToViewport);
+
+  document.getElementById('btn-theme').addEventListener('click', () => {
+    manualTheme = isDarkMode() ? 'light' : 'dark';
+    renderCurrent();
+    if (selectedNodeId) showInspector(selectedNodeId);
+  });
+
+  document.getElementById('btn-export-svg').addEventListener('click', () => {
+    const svg = svgHost.querySelector('svg');
+    if (!svg) return;
+    const clone = svg.cloneNode(true);
+    clone.removeAttribute('style');
+    const bgRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bgRect.setAttribute('width', '100%');
+    bgRect.setAttribute('height', '100%');
+    bgRect.setAttribute('fill', P.bg);
+    clone.insertBefore(bgRect, clone.firstChild);
+    const blob = new Blob([new XMLSerializer().serializeToString(clone)], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `diagrama_${activeTab}${activeTab === 'sequence' ? '_' + activeSeq : ''}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.svg-node')) return;
+    dragging = true;
+    startX = e.clientX - panX;
+    startY = e.clientY - panY;
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!dragging) return;
+    panX = e.clientX - startX;
+    panY = e.clientY - startY;
+    applyTransform();
+  });
+  window.addEventListener('mouseup', () => { dragging = false; });
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const factor = e.deltaY < 0 ? 1.08 : 0.92;
+    scale = Math.max(0.35, Math.min(2.4, scale * factor));
+    applyTransform();
+  }, { passive: false });
+
+  window.addEventListener('resize', fitToViewport);
+  window.addEventListener('themechange', () => {
+    if (!manualTheme) renderCurrent();
+  });
+
+  renderCurrent();
+})();
+</script>
+</body>
+</html>

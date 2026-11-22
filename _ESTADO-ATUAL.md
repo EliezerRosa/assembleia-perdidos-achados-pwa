@@ -11,7 +11,7 @@
 ## Status Geral
 
 - **Aplicação PWA (PC + Mobile):** Concluída, compilando sem erros (`tsc --noEmit` + `vite build` + Workbox SW) e validada por suíte de testes Vitest.
-- **Modelagem MER + UML Granular:** Concluída em `docs/MER.md`, `docs/UML.md`, `docs/ARQUITETURA.md` e integrada interativamente no app (`src/components/views/ArchitectureView.tsx`).
+- **Modelagem MER + UML Granular:** Concluída em `docs/MER.md`, `docs/UML.md`, `docs/ARQUITETURA.md`, no explorador gráfico-visual offline `docs/mer_uml_visual.html` / `public/mer-uml-visual.html` (online em `https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/mer-uml-visual.html`) e integrada no app (`src/components/views/ArchitectureView.tsx`).
 - **Compatibilidade Excel (`Perdidos e Achados (Guarda-Volumes).xlsx`):** Validada contra o arquivo real de 170 registros em 7 eventos (sem versionar nenhum dado pessoal/PII no Git).
 - **Voz (Acessibilidade pt-BR):** Implementada via Web Speech API + parser multi-campo + TTS + fallback por barra de comando (`Ctrl+K`).
 - **Sincronização Multi-Dispositivo (`localStorage` + JSON Merge):** Implementada com detecção/resolução de colisões de etiquetas, preservação de `etiquetaOrigem`, união de timelines de rastreio e Web Share API.
