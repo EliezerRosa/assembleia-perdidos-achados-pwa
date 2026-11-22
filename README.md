@@ -1,5 +1,7 @@
 # Perdidos & Achados — Guarda-Volumes (PWA)
 
+🌐 **Acesso Online (GitHub Pages / Instalável como PWA):** https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/
+
 Aplicativo **PWA (Progressive Web App)** offline-first desenvolvido para rodar em **PC (Windows/macOS/Linux)** e **Mobiles (Android/iOS)** no Departamento de **Perdidos e Achados & Guarda-Volumes** de Assembleias e Congressos.
 
 Baseado no fluxo operacional da planilha `Perdidos e Achados (Guarda-Volumes).xlsx`, do aplicativo Glide de referência, das orientações oficiais (§54–58) e do `Relatório Final - Após o Evento` (Salão de Assembleias — Guarapari/ES).

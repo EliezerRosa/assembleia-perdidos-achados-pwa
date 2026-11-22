@@ -2,7 +2,9 @@
 
 **Última atualização:** 2026-11-22  
 **Workspace local:** `C:\Antigravity - Assembleia`  
-**Repositório remoto:** `origin/main` (GitHub `EliezerRosa/assembleia-perdidos-achados-pwa`, privado)
+**Repositório remoto:** `origin/main` (GitHub `EliezerRosa/assembleia-perdidos-achados-pwa`)  
+**Deploy GitHub Pages (HTTPS + PWA):** https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/  
+**CI/CD:** `.github/workflows/deploy-pages.yml` (executa `typecheck`, `test`, `build` e publica no GitHub Pages a cada push na `main`)
 
 ---
 
