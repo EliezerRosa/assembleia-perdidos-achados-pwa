@@ -37,6 +37,5 @@
 
 ## Próximos Passos Sugeridos (Opcionais)
 
-1. Publicar build estático (`dist/`) no Vercel, Netlify ou GitHub Pages (com HTTPS obrigatório para instalação PWA e uso da câmera/microfone em celulares via rede externa).
-2. Caso deseje inspecionar telas adicionais do app Glide original (`https://go.glideapps.com/app/fDanoeJRA4XDD8zcrTca/layout`), habilitar remote debugging no Chrome (`chrome://inspect/#remote-debugging`) na próxima sessão.
-3. Importar localmente o arquivo `Perdidos e Achados (Guarda-Volumes).xlsx` pela aba **Exportar / Mesclar** para popular o histórico no navegador de trabalho.
+1. Importar localmente o arquivo `Perdidos e Achados (Guarda-Volumes).xlsx` pela aba **Exportar / Mesclar** no endereço online (`https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/`) para carregar o histórico diretamente no `localStorage` do aparelho.
+2. Em equipes com múltiplos celulares no mesmo evento, definir **Nome do Equipamento** e **Prefixo de Etiqueta** (ex.: `A-`, `B-`) na aba **Exportar / Mesclar** para evitar colisões físicas e consolidar tudo em um único PC/mobile ao final do evento.

@@ -277,6 +277,7 @@ export function transitionItemReopen(
       status: 'Ainda Guardado',
       destino: '',
       dataHoraDespachado: '',
+      quemPegou: '',
       rastreio: [...item.rastreio, ev],
       updatedAt: now,
     },

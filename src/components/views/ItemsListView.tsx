@@ -7,6 +7,7 @@ import {
   Clock,
   FileText,
   Filter,
+  Layers,
   LayoutGrid,
   List,
   Lock,
@@ -15,6 +16,7 @@ import {
   Search,
   ShieldAlert,
   Tag,
+  Unlock,
   X,
 } from 'lucide-react';
 import { CATEGORIAS_ITEM } from '../../constants/catalog';
@@ -46,11 +48,12 @@ export const ItemsListView: React.FC<ItemsListViewProps> = ({ onSelectItem }) =>
     showAllEventsInList,
     setShowAllEventsInList,
     openNewItemModal,
+    toggleEventoStatus,
     getNextTagForEvent,
     retidosCount,
   } = useAppStore();
 
-  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'sections' | 'table'>('cards');
   const [onlyRestricted, setOnlyRestricted] = useState(false);
 
   const eventsById = useMemo(() => new Map(db.eventos.map((e) => [e.id, e])), [db.eventos]);
@@ -108,8 +111,64 @@ export const ItemsListView: React.FC<ItemsListViewProps> = ({ onSelectItem }) =>
 
   const nextTag = activeEvento ? getNextTagForEvent(activeEvento.id) : null;
 
+  // 5 seções agrupadas idênticas à tela Achados e Perdidos do app Glide
+  const glideSections = useMemo(
+    () => [
+      {
+        id: 'guardados',
+        title: 'AINDA GUARDADOS (EM CUSTÓDIA)',
+        tone: 'border-amber-300 bg-amber-50 text-amber-950',
+        items: filteredItems.filter(
+          (i) => (i.status === 'Ainda Guardado' || i.status === 'Em Conferência') && !i.destino,
+        ),
+      },
+      {
+        id: 'vender',
+        title: 'SA — DESTINOU PARA VENDER',
+        tone: 'border-orange-300 bg-orange-50 text-orange-950',
+        items: filteredItems.filter((i) => i.destino === 'VENDER'),
+      },
+      {
+        id: 'doar',
+        title: 'SA — DESTINOU PARA DOAR',
+        tone: 'border-teal-300 bg-teal-50 text-teal-950',
+        items: filteredItems.filter((i) => i.destino === 'DOAR'),
+      },
+      {
+        id: 'descartar',
+        title: 'SA — DESTINOU PARA DESCARTAR',
+        tone: 'border-rose-300 bg-rose-50 text-rose-950',
+        items: filteredItems.filter((i) => i.destino === 'DESCARTAR'),
+      },
+      {
+        id: 'entregues',
+        title: 'JÁ ENTREGUES AOS DONOS / CONTAS',
+        tone: 'border-emerald-300 bg-emerald-50 text-emerald-950',
+        items: filteredItems.filter((i) => i.status === 'Já Entregue' && i.destino !== 'DOAR' && i.destino !== 'VENDER' && i.destino !== 'DESCARTAR'),
+      },
+    ],
+    [filteredItems],
+  );
+
   return (
     <div className="space-y-4">
+      {/* Banner Somente Visualização quando evento está fechado (espelho do Glide) */}
+      {activeEvento && activeEvento.status === 'encerrado' && (
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-950">
+          <span className="flex items-center gap-2 font-bold">
+            <Lock className="h-4 w-4 text-amber-700" />
+            Evento {activeEvento.codigo} está FECHADO — Só Permite Visualização, Não Atualização.
+          </span>
+          <button
+            type="button"
+            onClick={() => toggleEventoStatus(activeEvento.id)}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-amber-600 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-amber-700"
+          >
+            <Unlock className="h-3.5 w-3.5" />
+            Reabrir Evento
+          </button>
+        </div>
+      )}
       {/* Cabeçalho Operacional do Evento (espelho aprimorado do Glide) */}
       <div className="hc-card rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
         <div className="flex flex-col justify-between gap-3 lg:flex-row lg:items-center">
@@ -273,7 +332,7 @@ export const ItemsListView: React.FC<ItemsListViewProps> = ({ onSelectItem }) =>
               {showAllEventsInList ? 'Todos Eventos' : 'Só Evento Ativo'}
             </button>
 
-            <div className="hidden rounded-xl border border-slate-300 p-0.5 sm:flex">
+            <div className="flex rounded-xl border border-slate-300 p-0.5">
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
@@ -284,8 +343,16 @@ export const ItemsListView: React.FC<ItemsListViewProps> = ({ onSelectItem }) =>
               </button>
               <button
                 type="button"
+                onClick={() => setViewMode('sections')}
+                className={`rounded-lg p-2 ${viewMode === 'sections' ? 'bg-[#1e3a5f] text-white' : 'text-slate-600'}`}
+                title="5 Seções Agrupadas (Estilo Glide)"
+              >
+                <Layers className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
                 onClick={() => setViewMode('table')}
-                className={`rounded-lg p-2 ${viewMode === 'table' ? 'bg-[#1e3a5f] text-white' : 'text-slate-600'}`}
+                className={`hidden rounded-lg p-2 sm:inline-flex ${viewMode === 'table' ? 'bg-[#1e3a5f] text-white' : 'text-slate-600'}`}
                 title="Visualização em Tabela (PC)"
               >
                 <List className="h-4 w-4" />
@@ -454,6 +521,60 @@ export const ItemsListView: React.FC<ItemsListViewProps> = ({ onSelectItem }) =>
               </button>
             );
           })}
+        </div>
+      ) : viewMode === 'sections' ? (
+        /* 5 Seções Agrupadas (espelho exato do app Glide: Guardados, Vender, Doar, Descartar, Entregues) */
+        <div className="space-y-5">
+          {glideSections
+            .filter((sec) => sec.items.length > 0)
+            .map((sec) => (
+              <section key={sec.id} className="space-y-2.5">
+                <div className={`flex items-center justify-between rounded-xl border px-4 py-2 text-xs font-black tracking-wide ${sec.tone}`}>
+                  <span>{sec.title}</span>
+                  <span className="rounded-full bg-white/80 px-2.5 py-0.5 text-[11px] font-extrabold text-slate-900">
+                    {sec.items.length}
+                  </span>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {sec.items.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => onSelectItem(item)}
+                      className="hc-card flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-left hover:border-sky-400 transition"
+                    >
+                      {item.fotoEntrada ? (
+                        <img
+                          src={item.fotoEntrada}
+                          alt={item.tipoItem}
+                          loading="lazy"
+                          className="h-16 w-16 shrink-0 rounded-xl object-cover border border-slate-200"
+                        />
+                      ) : (
+                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                          <Camera className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[11px] font-black text-amber-950">
+                            #{item.etiquetaCodigo}
+                          </span>
+                          <span className="truncate text-sm font-extrabold text-slate-900">{item.tipoItem}</span>
+                          <ValorBadge valor={item.valor} />
+                        </div>
+                        <p className="mt-0.5 line-clamp-1 text-xs text-slate-600">{item.descricao}</p>
+                        <p className="mt-1 truncate text-[11px] text-slate-500">
+                          {item.status === 'Já Entregue'
+                            ? `Pegou: ${item.quemPegou || item.donoNomeTels || 'Dono'}`
+                            : `Trouxe: ${item.quemTrouxe || 'Não informado'}`}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            ))}
         </div>
       ) : (
         /* Tabela PC (alta densidade ergonômica) */

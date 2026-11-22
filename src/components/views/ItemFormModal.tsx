@@ -43,6 +43,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ registerSaveHandle
     closeNewItemModal,
     createItem,
     getNextTagForEvent,
+    getSuggestedFormPage,
     notify,
   } = useAppStore();
 
@@ -83,7 +84,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ registerSaveHandle
     if (!newItemModal.open || !activeEvento) return;
     const nxt = getNextTagForEvent(activeEvento.id);
     setEtiqueta(nxt.numero);
-    setFormPagina(Math.max(1, Math.ceil(nxt.numero / 20)));
+    setFormPagina(getSuggestedFormPage(activeEvento.id));
     setFotoEntrada('');
     setFotoEtiqueta('');
     setFotoEntrega('');
@@ -105,7 +106,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({ registerSaveHandle
     if (newItemModal.presetCategoria === 'Criança') {
       setTipoSelecionado('Criança / Pessoa');
     }
-  }, [newItemModal.open, newItemModal.presetCategoria, newItemModal.presetValor, activeEvento, getNextTagForEvent]);
+  }, [newItemModal.open, newItemModal.presetCategoria, newItemModal.presetValor, activeEvento, getNextTagForEvent, getSuggestedFormPage]);
 
   // Aplica campos recebidos do Assistente de Voz global enquanto o formulário está aberto
   useEffect(() => {

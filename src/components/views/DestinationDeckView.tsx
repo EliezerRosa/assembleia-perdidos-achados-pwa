@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   Archive,
   Banknote,
@@ -6,27 +6,40 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Clock,
   Gift,
+  Hand,
+  RotateCcw,
   Send,
   ShoppingBag,
   Trash2,
 } from 'lucide-react';
-import { getMesesGuardadoTexto, isCashItem, isItemRetido } from '../../services/trackingService';
+import { getDiasGuardado, getMesesGuardadoTexto, isCashItem, isItemRetido } from '../../services/trackingService';
 import { useAppStore } from '../../store/useAppStore';
-import type { DestinoSA, Item } from '../../types/domain';
+import type { DestinoSA, Item, ValorItem } from '../../types/domain';
 import { DestinoBadge, StatusBadge, ValorBadge } from '../common/Badge';
 
 interface DestinationDeckViewProps {
   onSelectItem: (item: Item) => void;
 }
 
+const VALOR_RECOMENDACAO: Record<ValorItem, string> = {
+  Baixo: 'Recomendação §57: Item de baixo valor — SA pode decidir livremente por Descartar ou Doar.',
+  Comum: 'Recomendação §57: Item comum — avaliar Doar ou Descartar após 2 meses.',
+  Médio: 'Recomendação §57: Valor médio — priorizar Doar ou Vender para a conta do circuito.',
+  Alto: 'Recomendação §57: Artigo de ALTO VALOR — aguardar até próxima assembleia; depois pode ser VENDIDO (depósito na conta do circuito).',
+  Precioso: 'Recomendação §57: Item PRECIOSO — redobrar tentativa de localizar o dono antes de destinar.',
+};
+
 export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSelectItem }) => {
-  const { db, dispatchItemSA, setPoliciesOpen } = useAppStore();
+  const { db, dispatchItemSA, reopenItem, setPoliciesOpen } = useAppStore();
 
   const [mode, setMode] = useState<'retidos' | 'despachados'>('retidos');
   const [includeRecent, setIncludeRecent] = useState(false);
+  const [onlyLast7Days, setOnlyLast7Days] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
   const [selectedDestino, setSelectedDestino] = useState<Exclude<DestinoSA, ''>>('DOAR');
+  const touchStartX = useRef<number | null>(null);
 
   const eventsById = useMemo(() => new Map(db.eventos.map((e) => [e.id, e])), [db.eventos]);
 
@@ -43,14 +56,34 @@ export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSele
   const despachados = useMemo(
     () =>
       db.itens
-        .filter((i) => i.status === 'DESPACHADO' || i.destino === 'CONTAS')
+        .filter((i) => {
+          if (i.status !== 'DESPACHADO' && i.destino !== 'CONTAS') return false;
+          if (!onlyLast7Days) return true;
+          if (!i.dataHoraDespachado) return false;
+          return getDiasGuardado(i.dataHoraDespachado) <= 7;
+        })
         .sort((a, b) => (b.dataHoraDespachado || '').localeCompare(a.dataHoraDespachado || '')),
-    [db.itens],
+    [db.itens, onlyLast7Days],
   );
 
   const safeIndex = retidos.length > 0 ? Math.min(cardIndex, retidos.length - 1) : 0;
   const currentItem = retidos[safeIndex];
   const currentEvent = currentItem ? eventsById.get(currentItem.eventoId) : undefined;
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || retidos.length <= 1) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(dx) < 48) return;
+    if (dx < 0) {
+      setCardIndex((i) => (i + 1) % retidos.length);
+    } else {
+      setCardIndex((i) => (i - 1 + retidos.length) % retidos.length);
+    }
+  };
 
   const handleDispatchCurrent = () => {
     if (!currentItem) return;
@@ -122,7 +155,11 @@ export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSele
 
       {mode === 'retidos' ? (
         currentItem ? (
-          <div className="hc-card overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
+          <div
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            className="hc-card overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg"
+          >
             {/* Cabeçalho do Cartão */}
             <div className="flex items-center justify-between bg-slate-900 px-4 py-2.5 text-xs font-bold text-white">
               <span>
@@ -130,7 +167,8 @@ export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSele
                   ? `${currentEvent.tipo.toUpperCase()} | ${currentEvent.codigo} | ${currentEvent.data.split('-').reverse().join('/')}`
                   : 'EVENTO'}
               </span>
-              <span className="rounded-full bg-white/15 px-2.5 py-0.5">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-0.5">
+                {retidos.length > 1 && <Hand className="h-3 w-3 text-amber-300" />}
                 {safeIndex + 1} de {retidos.length}
               </span>
             </div>
@@ -186,6 +224,11 @@ export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSele
 
             {/* Seleção de Destino SA */}
             <div className="space-y-4 p-5">
+              {/* Recomendação automática baseada no Valor (igual if_Exibir Valor Recomendação no Glide) */}
+              <div className="rounded-xl border border-amber-200 bg-amber-50/70 px-3 py-2 text-xs font-semibold text-amber-950">
+                {VALOR_RECOMENDACAO[currentItem.valor]}
+              </div>
+
               {isCashItem(currentItem) && (
                 <div className="rounded-xl border border-blue-300 bg-blue-50 p-3 text-xs font-semibold text-blue-900">
                   Política #57: Dinheiro não procurado deve ser encaminhado ao <strong>Departamento de Contas</strong>.
@@ -258,40 +301,85 @@ export const DestinationDeckView: React.FC<DestinationDeckViewProps> = ({ onSele
           </div>
         )
       ) : (
-        <div className="space-y-2.5">
+        <div className="space-y-3">
+          {/* Regra explícita do Glide (ANL4cdICJTsLdTONT7Hp) + Filtro < 7 dias */}
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-sky-200 bg-sky-50/70 px-3.5 py-2.5 text-xs text-sky-950">
+            <p className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5 shrink-0 text-sky-700" />
+              <span>
+                <strong>Despachados (&lt; 7 dias):</strong> Dentro de 7 dias do despacho, o SA pode{' '}
+                <strong>REVERTER o despacho</strong> diretamente abaixo.
+              </span>
+            </p>
+            <label className="inline-flex cursor-pointer items-center gap-2 font-bold">
+              <input
+                type="checkbox"
+                checked={onlyLast7Days}
+                onChange={(e) => setOnlyLast7Days(e.target.checked)}
+                className="h-4 w-4 accent-[#1e3a5f]"
+              />
+              Somente últimos 7 dias
+            </label>
+          </div>
+
           {despachados.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center text-xs text-slate-500">
               <Archive className="mx-auto h-8 w-8 text-slate-300" />
-              <p className="mt-2">Nenhum item despachado pelo SA ainda.</p>
+              <p className="mt-2">Nenhum item despachado pelo SA neste filtro.</p>
             </div>
           ) : (
-            despachados.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onSelectItem(item)}
-                className="hc-card flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 text-left hover:border-sky-400 transition"
-              >
-                {item.fotoEntrada && (
-                  <img src={item.fotoEntrada} alt={item.tipoItem} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
-                )}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-950">
-                      #{item.etiquetaCodigo}
-                    </span>
-                    <span className="text-sm font-extrabold text-slate-900">{item.tipoItem}</span>
-                    <DestinoBadge destino={item.destino} />
-                    <StatusBadge status={item.status} />
-                  </div>
-                  <p className="mt-0.5 line-clamp-1 text-xs text-slate-600">{item.descricao}</p>
-                  <p className="mt-1 text-[11px] text-slate-500">
-                    Despachado em{' '}
-                    {item.dataHoraDespachado ? new Date(item.dataHoraDespachado).toLocaleString('pt-BR') : '-'}
-                  </p>
+            despachados.map((item) => {
+              const diasDesdeDespacho = item.dataHoraDespachado ? getDiasGuardado(item.dataHoraDespachado) : 999;
+              const podeReverter = diasDesdeDespacho <= 7;
+              return (
+                <div
+                  key={item.id}
+                  className="hc-card flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 hover:border-sky-400 transition"
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelectItem(item)}
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    {item.fotoEntrada && (
+                      <img src={item.fotoEntrada} alt={item.tipoItem} className="h-14 w-14 shrink-0 rounded-xl object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-950">
+                          #{item.etiquetaCodigo}
+                        </span>
+                        <span className="text-sm font-extrabold text-slate-900">{item.tipoItem}</span>
+                        <DestinoBadge destino={item.destino} />
+                        <StatusBadge status={item.status} />
+                      </div>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-slate-600">{item.descricao}</p>
+                      <p className="mt-1 text-[11px] text-slate-500">
+                        Despachado em{' '}
+                        {item.dataHoraDespachado ? new Date(item.dataHoraDespachado).toLocaleString('pt-BR') : '-'}
+                        {podeReverter && (
+                          <span className="ml-2 font-bold text-emerald-700">• Dentro dos 7 dias para reversão</span>
+                        )}
+                      </p>
+                    </div>
+                  </button>
+                  {podeReverter && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Reverter despacho da etiqueta #${item.etiquetaCodigo} para "Ainda Guardado"?`)) {
+                          reopenItem(item.id, 'REVERTER DESPACHADO pelo SA dentro do prazo de 7 dias.');
+                        }
+                      }}
+                      className="touch-target inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-800 hover:bg-rose-100 transition"
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      Reverter Despacho
+                    </button>
+                  )}
                 </div>
-              </button>
-            ))
+              );
+            })
           )}
         </div>
       )}

@@ -3,11 +3,14 @@ import {
   ArrowRight,
   Calendar,
   CheckCircle2,
+  Copy,
   FileSpreadsheet,
+  Lock,
   MapPin,
   Plus,
   Sparkles,
   Trash2,
+  Unlock,
   Users,
 } from 'lucide-react';
 import { useAppStore } from '../../store/useAppStore';
@@ -29,10 +32,34 @@ export const DashboardEventsView: React.FC<DashboardEventsViewProps> = ({
     setActiveEvento,
     setActiveTab,
     createEvento,
+    toggleEventoStatus,
     deleteEvento,
     loadDemoData,
     getNextTagForEvent,
+    notify,
   } = useAppStore();
+
+  const handleCopyTeamInvite = async (ev: typeof activeEvento) => {
+    if (!ev) return;
+    const appUrl = window.location.href.split('#')[0];
+    const msg = [
+      `📦 *Departamento de Perdidos e Achados & Guarda-Volumes*`,
+      `"Que o favor de Jeová, nosso Deus, esteja sobre nós..." (Salmo 90:17)`,
+      ``,
+      `📅 *Evento:* ${ev.tipo} • *${ev.codigo}* (${ev.data.split('-').reverse().join('/')})`,
+      `📍 *Local:* ${ev.local}`,
+      `🏷️ *Próxima Etiqueta:* #${getNextTagForEvent(ev.id).codigo}`,
+      `🌐 *App PWA (PC + Mobile Offline):* ${appUrl}`,
+      ``,
+      `💡 *Dica de equipe:* Para consolidar registros de vários celulares no fim do evento, use a aba *Exportar / Mesclar*!`,
+    ].join('\n');
+    try {
+      await navigator.clipboard.writeText(msg);
+      notify('Mensagem de boas-vindas e link do evento copiados para a área de transferência!', 'success');
+    } catch {
+      notify('Não foi possível copiar automaticamente. Copie o endereço na barra do navegador.', 'warning');
+    }
+  };
 
   const [showCreate, setShowCreate] = useState(false);
   const [tipo, setTipo] = useState<string>('Assembleia');
@@ -111,28 +138,93 @@ export const DashboardEventsView: React.FC<DashboardEventsViewProps> = ({
         </div>
       </div>
 
-      {/* Evento Ativo - Acesso Rápido (inspirado no botão verde "ENTRAR" do vídeo Glide) */}
+      {/* Evento Ativo - Acesso Rápido (inspirado no EVENTO EM FOCO do Glide: Abrir/Fechar + Copiar Mensagem + Entrar) */}
       {activeEvento && (
-        <div className="hc-card flex flex-col justify-between gap-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50/70 p-4 shadow-xs sm:flex-row sm:items-center">
+        <div
+          className={`hc-card flex flex-col justify-between gap-4 rounded-2xl border-2 p-4 shadow-xs sm:flex-row sm:items-center ${
+            activeEvento.status === 'encerrado'
+              ? 'border-amber-400 bg-amber-50/70'
+              : 'border-emerald-400 bg-emerald-50/70'
+          }`}
+        >
           <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-emerald-800">Evento Selecionado Agora</p>
-            <h3 className="mt-0.5 text-lg font-extrabold text-slate-900">
+            <div className="flex flex-wrap items-center gap-2">
+              <p
+                className={`text-xs font-bold uppercase tracking-wider ${
+                  activeEvento.status === 'encerrado' ? 'text-amber-900' : 'text-emerald-800'
+                }`}
+              >
+                Evento em Foco
+              </p>
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${
+                  activeEvento.status === 'encerrado'
+                    ? 'bg-amber-200 text-amber-950'
+                    : 'bg-emerald-200 text-emerald-950'
+                }`}
+              >
+                {activeEvento.status === 'encerrado' ? (
+                  <>
+                    <Lock className="h-3 w-3" /> FECHADO (Só Visualização)
+                  </>
+                ) : (
+                  <>
+                    <Unlock className="h-3 w-3" /> ABERTO (Permite Adicionar/Editar)
+                  </>
+                )}
+              </span>
+            </div>
+            <h3 className="mt-1 text-lg font-extrabold text-slate-900">
               {activeEvento.tipo} • {activeEvento.codigo} | {activeEvento.data.split('-').reverse().join('/')}
             </h3>
-            <p className="mt-1 text-xs font-semibold text-emerald-900">
-              Próxima etiqueta livre: <span className="rounded bg-emerald-700 px-2 py-0.5 text-white">#{getNextTagForEvent(activeEvento.id).codigo}</span>
+            <p className="mt-1 text-xs font-semibold text-slate-700">
+              Próxima etiqueta livre:{' '}
+              <span className="rounded bg-[#1e3a5f] px-2 py-0.5 text-white">
+                #{getNextTagForEvent(activeEvento.id).codigo}
+              </span>
               {' • '}
               {db.itens.filter((i) => i.eventoId === activeEvento.id).length} itens cadastrados neste evento
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => setActiveTab('itens')}
-            className="touch-target inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-extrabold text-white shadow-md hover:bg-emerald-700 active:scale-[0.99] transition"
-          >
-            ENTRAR NO EVENTO
-            <ArrowRight className="h-4 w-4" />
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => handleCopyTeamInvite(activeEvento)}
+              className="touch-target inline-flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+              title="Copiar convite e instruções para o grupo WhatsApp da equipe"
+            >
+              <Copy className="h-4 w-4" />
+              Copiar p/ Equipe
+            </button>
+            <button
+              type="button"
+              onClick={() => toggleEventoStatus(activeEvento.id)}
+              className={`touch-target inline-flex items-center justify-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-xs font-bold transition ${
+                activeEvento.status === 'encerrado'
+                  ? 'border-emerald-300 bg-white text-emerald-800 hover:bg-emerald-50'
+                  : 'border-amber-300 bg-white text-amber-900 hover:bg-amber-50'
+              }`}
+              title="Alternar entre evento aberto (edição) e fechado (somente visualização)"
+            >
+              {activeEvento.status === 'encerrado' ? (
+                <>
+                  <Unlock className="h-4 w-4" /> ABRIR
+                </>
+              ) : (
+                <>
+                  <Lock className="h-4 w-4" /> FECHAR
+                </>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('itens')}
+              className="touch-target inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-extrabold text-white shadow-md hover:bg-emerald-700 active:scale-[0.99] transition"
+            >
+              ENTRAR NO EVENTO
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       )}
 

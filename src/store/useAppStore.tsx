@@ -101,6 +101,7 @@ interface AppContextValue {
   setActiveEvento: (eventoId: string) => void;
   createEvento: (input: Omit<Evento, 'id' | 'proximaEtiqueta' | 'createdAt' | 'updatedAt' | 'deviceId'>) => Evento;
   updateEvento: (evento: Evento) => void;
+  toggleEventoStatus: (eventoId: string) => void;
   deleteEvento: (eventoId: string) => void;
 
   createItem: (input: NewItemInput) => Item;
@@ -148,6 +149,7 @@ interface AppContextValue {
   retidosCount: number;
   procuradosAbertosCount: number;
   getNextTagForEvent: (eventoId: string) => { numero: number; codigo: string };
+  getSuggestedFormPage: (eventoId: string) => number;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -242,11 +244,34 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [db.eventos, db.itens, db.config.etiquetaInicial, db.config.prefixoEtiqueta],
   );
 
+  /**
+   * Espelha a lógica do Glide (ÚltimaPágina + QtasLinhasÚltimaPágina):
+   * cada folha física S-22 comporta ~18 registros antes de avançar para a próxima página.
+   */
+  const getSuggestedFormPage = useCallback(
+    (eventoId: string) => {
+      const evItems = db.itens.filter((i) => i.eventoId === eventoId);
+      if (evItems.length === 0) return 1;
+      const lastPage = evItems.reduce((acc, i) => Math.max(acc, i.formPagina || 1), 1);
+      const countOnLastPage = evItems.filter((i) => (i.formPagina || 1) === lastPage).length;
+      return countOnLastPage >= 18 ? lastPage + 1 : lastPage;
+    },
+    [db.itens],
+  );
+
   const openNewItemModal = useCallback(
     (opts?: { presetCategoria?: CategoriaItem; presetValor?: ValorItem; voiceDraft?: Partial<Item> }) => {
       if (!activeEvento) {
         notify('Selecione ou crie um evento primeiro antes de cadastrar um item.', 'warning', true);
         setActiveTab('evento');
+        return;
+      }
+      if (activeEvento.status === 'encerrado') {
+        notify(
+          `Evento ${activeEvento.codigo} está FECHADO (somente visualização). Reabra o evento para adicionar novos itens.`,
+          'warning',
+          true,
+        );
         return;
       }
       setNewItemModal({ open: true, ...opts });
@@ -300,6 +325,28 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       notify(`Evento ${evento.codigo} atualizado.`, 'success');
     },
     [notify],
+  );
+
+  const toggleEventoStatus = useCallback(
+    (eventoId: string) => {
+      const ev = db.eventos.find((e) => e.id === eventoId);
+      if (!ev) return;
+      const nextStatus: Evento['status'] = ev.status === 'ativo' ? 'encerrado' : 'ativo';
+      setDb((prev) => ({
+        ...prev,
+        eventos: prev.eventos.map((e) =>
+          e.id === eventoId ? { ...e, status: nextStatus, updatedAt: new Date().toISOString() } : e,
+        ),
+      }));
+      notify(
+        nextStatus === 'ativo'
+          ? `Evento ${ev.codigo} ABERTO — permite visualizar, adicionar e atualizar itens.`
+          : `Evento ${ev.codigo} FECHADO — modo somente visualização ativado.`,
+        'info',
+        true,
+      );
+    },
+    [db.eventos, notify],
   );
 
   const deleteEvento = useCallback(
@@ -706,6 +753,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setActiveEvento,
     createEvento,
     updateEvento,
+    toggleEventoStatus,
     deleteEvento,
     createItem,
     updateItem,
@@ -727,6 +775,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     retidosCount,
     procuradosAbertosCount,
     getNextTagForEvent,
+    getSuggestedFormPage,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
