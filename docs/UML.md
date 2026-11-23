@@ -16,9 +16,9 @@ flowchart LR
 
     subgraph Sys ["PWA Perdidos e Achados & Guarda-Volumes"]
         subgraph ModEventos ["Módulo Eventos"]
-            UC01[UC01 Selecionar Evento Ativo]
+            UC01[UC01 Selecionar / Abrir-Fechar Evento Somente Leitura]
             UC02[UC02 Criar Evento Assembleia/Congresso com Código e Parte A/B]
-            UC03[UC03 Consultar KPIs por Evento]
+            UC03[UC03 Consultar KPIs e Copiar Convite Equipe WhatsApp]
         end
 
         subgraph ModCustodia ["Módulo Recepção & Custódia"]
@@ -30,7 +30,7 @@ flowchart LR
         end
 
         subgraph ModCiclo ["Módulo Busca, Conferência & Entrega"]
-            UC09[UC09 Buscar e Filtrar Itens por Etiqueta/Texto/Status/Restrito]
+            UC09[UC09 Buscar, Filtrar e Ver em Cartões / 5 Seções Glide / Tabela]
             UC10[UC10 Colocar Item Em Conferência com Solicitante]
             UC11[UC11 Registrar Entrega ao Dono com Foto 3 e Rastreio]
             UC12[UC12 Encaminhar Dinheiro ao Depto. de Contas §57]
@@ -43,10 +43,10 @@ flowchart LR
             UC16[UC16 Vincular Múltiplos Prováveis Itens Localizados]
         end
 
-        subgraph ModSA ["Módulo Destinação SA & Relatório"]
-            UC17[UC17 Avaliar Deck de Itens Retidos >= 60 dias]
-            UC18[UC18 Despachar Item: Doar / Vender / Descartar / Contas]
-            UC19[UC19 Preencher e Imprimir Relatório Final A4]
+        subgraph ModSA ["Módulo Destinação SA & Documentos A4"]
+            UC17[UC17 Avaliar Deck Swipe Retidos >= 60d + Recomendação Valor]
+            UC18[UC18 Despachar Item SA e Reverter Despacho < 7 dias]
+            UC19[UC19 Gerar/Imprimir ANEXO 1 15 linhas/pág. + Relatório Final A4]
         end
 
         subgraph ModVozSync ["Acessibilidade por Voz & Multi-Dispositivo"]
@@ -54,7 +54,7 @@ flowchart LR
             UC21[UC21 Ditar Campos Individuais ou Frase Multi-Campo]
             UC22[UC22 Exportar/Compartilhar Pacote JSON com Fotos]
             UC23[UC23 Importar e Mesclar com Resolução de Colisões de Etiqueta]
-            UC24[UC24 Importar e Exportar Planilha Excel .xlsx / .csv]
+            UC24[UC24 Importar/Exportar Excel .xlsx/.csv e PA.txt Acrobat]
         end
     end
 
@@ -142,6 +142,7 @@ classDiagram
       +string id
       +string eventoId
       +string circuito
+      +string salaoAssembleias
       +string superintendente
       +int voluntariosNecessarios
       +int voluntariosUsados
@@ -149,6 +150,9 @@ classDiagram
       +boolean dificuldadeDurante
       +boolean dificuldadeApos
       +string sugestoes
+      +string responsavelRelatorio
+      +string telefoneResponsavel
+      +string enderecoRestituicao
     }
 
     class StorageService {
@@ -186,6 +190,7 @@ classDiagram
     class ExcelService {
       +importFromSpreadsheetBuffer(buf, fileName, db) ExcelImportResult
       +exportToSpreadsheet(db, format, eventoId) BlobExport
+      +exportToAcrobatTxt(db, eventoId) BlobExport
     }
 
     class VoiceService {
@@ -239,7 +244,7 @@ stateDiagram-v2
     Retido60Dias --> DespachadoSA : SA define DOAR | VENDER | DESCARTAR
 
     JaEntregue --> AindaGuardado : Reabertura auditada (etapa REABERTO)
-    DespachadoSA --> AindaGuardado : Reabertura auditada (etapa REABERTO)
+    DespachadoSA --> AindaGuardado : Reverter Despacho < 7 dias (limpa 4 campos + REABERTO)
 
     EntregueContas --> [*]
     DespachadoSA --> [*]
@@ -338,11 +343,16 @@ sequenceDiagram
     SA->>Deck: Abre aba "Destinar (SA)"
     Deck->>Track: Filtra itens com status Guardado e getDiasGuardado() >= 60
     Deck-->>SA: Exibe cartões com foto, etiqueta, meses em guarda e botão Orientações (§54-58)
-    SA->>Deck: Navega entre cartões e seleciona destino (DOAR | VENDER | DESCARTAR | CONTAS)
+    SA->>Deck: Navega entre cartões (Swipe/Setas), lê Recomendação por Valor e escolhe destino (DOAR | VENDER | DESCARTAR | CONTAS)
     SA->>Deck: Toca "DESPACHAR ITEM ACIMA"
     Deck->>Track: transitionItemToDispatchedSA(item, destino)
     Track->>Track: Define status=DESPACHADO (ou Já Entregue se CONTAS), quemPegou=SA, evento DESPACHADO_SA
     Deck->>Store: Salva em localStorage e avança automaticamente para o próximo cartão
+    opt Reversão dentro da janela de 7 dias
+      SA->>Deck: Filtra "Despachados (Somente últimos 7 dias)" e toca "Reverter Despacho"
+      Deck->>Track: transitionItemReopen() -> limpa destino, dataDespacho e quemPegou + grava REABERTO
+      Track->>Store: Item volta para Ainda Guardado com histórico preservado
+    end
 ```
 
 ### 4.5 Sequência E — Exportação, Importação e Mesclagem Multi-Dispositivo
@@ -418,14 +428,14 @@ flowchart TD
 
 ```mermaid
 flowchart TB
-    subgraph Devices ["Execução Multiplataforma (PC Windows/Mac/Linux + Android + iOS)"]
+    subgraph Devices ["Execução Multiplataforma (GitHub Pages HTTPS • PC + Android + iOS)"]
         subgraph Browser ["Navegador / App Instalado (Standalone PWA)"]
             Manifest[manifest.webmanifest + Ícones 192/512]
-            SW[Workbox Service Worker<br/>Cache Offline de Assets]
+            SW[Workbox Service Worker<br/>Cache Offline 70 assets + mer-uml-visual.html]
 
             subgraph Presentation ["Camada de Apresentação (React 19 + Tailwind CSS v4)"]
                 Shell[AppShell Responsivo<br/>Sidebar PC + Bottom Nav Mobile]
-                Views[7 Views Especializadas + Modais<br/>Eventos, Itens, Procurados, Destinar, Relatório A4, Sync, MER/UML]
+                Views[7 Views + 2 Modais<br/>Eventos Abrir/Fechar, Itens 5 Seções, Procurados, Destinar Swipe 7d, ANEXO 1 15l + Relatório A4, Sync, MER/UML]
                 VoiceUI[VoiceAssistant HUD + VoiceInput por Campo]
             end
 

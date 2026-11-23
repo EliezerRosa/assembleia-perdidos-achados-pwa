@@ -31,7 +31,7 @@ const DIAGRAMS: DiagramSpec[] = [
       date data "Evento Data"
       string local "Salao de Assembleias"
       int proximaEtiqueta "Auto-incremento"
-      string status "ativo | encerrado"
+      string status "ativo (ABRIR) | encerrado (FECHAR)"
     }
     ITEM {
       string id PK "Row ID / UUID"
@@ -84,6 +84,7 @@ const DIAGRAMS: DiagramSpec[] = [
       string id PK
       string eventoId FK
       string circuito
+      string salaoAssembleias "ANEXO 1"
       string superintendente
       int voluntariosNecessarios
       int voluntariosUsados
@@ -92,6 +93,8 @@ const DIAGRAMS: DiagramSpec[] = [
       boolean dificuldadeApos
       string sugestoes
       string responsavelRelatorio
+      string telefoneResponsavel "ANEXO 1"
+      string enderecoRestituicao "ANEXO 1"
     }`,
   },
   {
@@ -123,7 +126,7 @@ const DIAGRAMS: DiagramSpec[] = [
     Retido_60d --> Ja_Entregue : Dono localizado tardiamente
 
     Ja_Entregue --> Ainda_Guardado : Reabertura auditada
-    Despachado_SA --> Ainda_Guardado : Reabertura auditada
+    Despachado_SA --> Ainda_Guardado : Reverter Despacho < 7 dias (limpa 4 campos)
     Entregue_Contas --> [*]
     Despachado_SA --> [*]
     Ja_Entregue --> [*]`,
@@ -225,6 +228,7 @@ const DIAGRAMS: DiagramSpec[] = [
     class ExcelService {
       +importFromSpreadsheetBuffer(buf, name, db) ExcelImportResult
       +exportToSpreadsheet(db, format, eventoId) BlobFile
+      +exportToAcrobatTxt(db, eventoId) BlobFile
     }
     class VoiceService {
       +startSingleUtteranceRecognition(cb) StopFn
@@ -251,18 +255,18 @@ const DIAGRAMS: DiagramSpec[] = [
     DevExt([Outro Celular / PC])
 
     subgraph PWA ["PWA Perdidos & Achados + Guarda-Volumes"]
-      UC1[UC01 Selecionar / Criar Evento]
-      UC2[UC02 Cadastrar Item Foto1-Etiqueta-Foto2]
+      UC1[UC01 Selecionar / Abrir-Fechar Evento + Convite Equipe]
+      UC2[UC02 Cadastrar Item Foto1-Etiqueta-Foto2 + Form Pagina 15l]
       UC3[UC03 Cadastrar Guarda-Volumes §58]
       UC4[UC04 Protocolo Pessoa Perdida §56]
       UC5[UC05 Acionar Comandos e Ditado por Voz]
-      UC6[UC06 Buscar e Conferir Item §55]
+      UC6[UC06 Buscar, 5 Secoes Glide e Conferir Item §55]
       UC7[UC07 Registrar Entrega + Foto 3 + Rastreio]
       UC8[UC08 Cadastrar e Cruzar Item Procurado]
-      UC9[UC09 Destinar Retidos >60d Doar/Vender/Descartar/Contas]
-      UC10[UC10 Gerar e Imprimir Relatorio Final A4]
+      UC9[UC09 Destinar Swipe >60d + Reverter Despacho <7d]
+      UC10[UC10 Gerar/Imprimir ANEXO 1 15l/pag + Relatorio Final A4]
       UC11[UC11 Exportar / Importar / Mesclar Dispositivos]
-      UC12[UC12 Importar / Exportar Planilha Excel .xlsx]
+      UC12[UC12 Importar/Exportar Excel .xlsx e PA.txt Acrobat]
     end
 
     Vol --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8

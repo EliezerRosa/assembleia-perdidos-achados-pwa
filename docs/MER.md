@@ -30,7 +30,7 @@ erDiagram
         int voluntariosNecessarios "Qtd prevista"
         int voluntariosUsados "Qtd efetiva"
         int proximaEtiqueta "Sequencia automatica por evento"
-        string status "ativo | encerrado"
+        string status "ativo (ABRIR) | encerrado (FECHAR somente leitura)"
         datetime createdAt "ISO-8601"
         datetime updatedAt "ISO-8601"
         string deviceId FK "Equipamento criador"
@@ -106,6 +106,7 @@ erDiagram
         string parte "A | B | vazio"
         date data "Data do evento"
         string departamento "Perdidos e Achados / Guarda Volume"
+        string salaoAssembleias "Cabecalho ANEXO 1 (ex.: Guarapari)"
         string superintendente "Nome"
         string ajudantes "Nomes"
         int voluntariosNecessarios "Inteiro"
@@ -117,8 +118,10 @@ erDiagram
         boolean dificuldadeApos "SIM/NAO"
         text dificuldadeAposTexto "Detalhes"
         text sugestoes "Sugestoes proximos eventos"
-        string responsavelRelatorio "Nome"
-        string congregacaoResponsavel "Congregacao"
+        string responsavelRelatorio "Nome (Relatorio Final + ANEXO 1)"
+        string congregacaoResponsavel "Congregacao (Relatorio + ANEXO 1)"
+        string telefoneResponsavel "Telefone para restituicao (ANEXO 1)"
+        string enderecoRestituicao "Endereco para restituicao dos itens (ANEXO 1)"
         string cidadeAssinatura "Guarapari/ES"
         date dataAssinatura "Data da assinatura"
         string assinaturaNome "Nome sob a linha"
@@ -167,7 +170,7 @@ Todas as 25 colunas da planilha original `Perdidos e Achados (Guarda-Volumes).xl
 | --- | --- | --- |
 | `🔒 Row ID` | `Item.id` | Chave de idempotência na reimportação |
 | `fk_id_Eventos` | `Item.eventoId` → `Evento.id` | Agrupa todos os itens no mesmo evento |
-| `Form Página` / `FormPágina` | `Item.formPagina` | Página do formulário em papel onde vai a 2ª etiqueta gêmea |
+| `Form Página` / `FormPágina` | `Item.formPagina` | Página física do ANEXO 1 (15 itens/folha; cálculo automático via `getSuggestedFormPage()`) |
 | `DESTINO` | `Item.destino` | `DESCARTAR`, `DOAR`, `VENDER`, `CONTAS` |
 | `Evento Tipo` | `Evento.tipo` | `Assembleia`, `Congresso`, etc. |
 | `Evento Código` | `Evento.codigo` | Ex.: `ES-005`, `CO-2023`, `ES-005.24.1`, `AC-26-04-25` |
@@ -199,5 +202,7 @@ Todas as 25 colunas da planilha original `Perdidos e Achados (Guarda-Volumes).xl
 2. **Integridade da Dupla Etiqueta (Foto • Etiqueta • Foto)**: Todo item suporta `fotoEntrada` (Foto 1), confirmação de etiqueta no objeto + etiqueta gêmea na `formPagina`, `fotoEtiqueta` (Foto 2) e `fotoEntrega` (Foto 3).
 3. **Política §55 (Restrição Visual)**: Itens com `valor ∈ {Alto, Precioso}` ou tipos sensíveis (`Carteira`, `Bolsa`, `Celular`, `Dinheiro`, `Chave`, `Relógio`, `Anel`, `Pingente`) recebem marcação automática **"Não Expor (#55)"** e sugestão de custódia em Cofre/Área Restrita.
 4. **Política §56 (Pessoas Perdidas)**: Itens com `categoria ∈ {Criança, Idoso, Adulto}` acionam banner crítico proibindo anúncio no microfone e instruindo aviso imediato a Indicadores, SA e SC.
-5. **Política §57 (Dinheiro e Retenção 60 Dias)**: Dinheiro alerta entrega imediata ao **Departamento de Contas** ao término da assembleia; demais itens `Ainda Guardado` com `diasGuardado >= prazoRetencaoDias` (padrão 60 dias) entram automaticamente no Deck **Destinar (SA)**.
+5. **Política §57 (Dinheiro, Retenção 60 Dias e Reversão 7 Dias)**: Dinheiro alerta entrega imediata ao **Departamento de Contas** ao término da assembleia; demais itens `Ainda Guardado` com `diasGuardado >= prazoRetencaoDias` (padrão 60 dias / > 2 meses) entram automaticamente no Deck **Destinar (SA)** com recomendação baseada no valor. Itens despachados há **menos de 7 dias** exibem o botão **Reverter Despacho** (limpa `destino`, `dataHoraDespachado` e `quemPegou`, retorna a `Ainda Guardado` e registra evento `REABERTO` no rastreio).
 6. **Política §58 (Guarda-Volumes)**: Itens com `categoria = Guardado` (exceto roupas: casaco, paletó, blusa, blazer) exigem preenchimento de `donoNomeTels` e `congregacao` no cadastro.
+7. **Trava de Evento (`ABRIR` / `FECHAR`)**: Quando `Evento.status = encerrado`, o aplicativo bloqueia novos cadastros no evento (modo somente visualização) até reabertura explícita.
+8. **Paginação ANEXO 1 (15 linhas/folha) & `PA.txt`**: Cada página A4 do **ANEXO 1 — Relação dos Itens Encontrados (Manual Pág. 16/19)** comporta exatamente 15 linhas (`1.` a `15.`), ignorando `Já Entregue` por padrão — exatamente como o antigo PDF com Acrobat JS (`PA.txt`), cuja exportação também é mantida por retrocompatibilidade.

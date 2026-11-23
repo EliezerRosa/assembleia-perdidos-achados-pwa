@@ -362,11 +362,11 @@
     'mer-evento': {
       badge: 'Entidade MER • PK: id',
       title: 'EVENTO (Assembleia / Congresso)',
-      desc: 'Agrupa todos os itens, solicitações de itens procurados e o Relatório Final de um evento específico. No merge offline multi-dispositivo, eventos criados separadamente são unificados pelo par lógico (codigo + data).',
+      desc: 'Agrupa todos os itens, solicitações de itens procurados, ANEXO 1 e o Relatório Final. Possui trava ABRIR/FECHAR (edição vs. somente visualização), convite copiável p/ equipe (Salmo 90:17) e unificação automática no merge pelo par (codigo + data).',
       sections: [
-        { label: 'Chaves & Controle', items: ['PK id (UUID ou fk_id_Eventos Glide)', 'UNIQUE lógica (codigo, data)', 'proximaEtiqueta (auto-incremento por evento)', 'status: ativo | encerrado'] },
+        { label: 'Chaves & Controle', items: ['PK id (UUID ou fk_id_Eventos Glide)', 'UNIQUE lógica (codigo, data)', 'proximaEtiqueta + getSuggestedFormPage (15 itens/pág. ANEXO 1)', 'status: ativo (ABRIR) | encerrado (FECHAR somente visualização)'] },
         { label: 'Mapeamento Planilha Excel', items: ['Evento Tipo → tipo (Assembleia | Congresso)', 'Evento Código → codigo (ES-005.27.1, CO-2027)', 'Evento Data / X Evento Data → data', 'Relatório PDF → circuito, parte (A/B), voluntários'] },
-        { label: 'Relacionamentos', items: ['1:N com ITEM', '1:N com ITEM_PROCURADO', '1:0..1 com RELATORIO_FINAL'] },
+        { label: 'Relacionamentos', items: ['1:N com ITEM', '1:N com ITEM_PROCURADO', '1:0..1 com RELATORIO_FINAL (Relatório + ANEXO 1)'] },
       ]
     },
     'mer-item': {
@@ -396,9 +396,9 @@
     },
     'mer-relatorio': {
       badge: 'Entidade MER • 1:1 com EVENTO',
-      title: 'RELATORIO_FINAL (Folha Oficial A4)',
-      desc: 'Espelho fiel do formulário "Relatório Final - Após o Evento" do Salão de Assembleias (Guarapari/ES), preenchível por voz e imprimível em PDF A4 limpo.',
-      sections: [{ label: 'Campos Oficiais', items: ['circuito, eventoTipo, parte (A/B), data, departamento', 'superintendente, ajudantes, voluntariosNecessarios/Usados', 'dificuldadeAntes / Durante / Apos (SIM/NÃO + texto)', 'sugestoes, responsavelRelatorio, congregacao, assinatura'] }]
+      title: 'RELATORIO_FINAL + ANEXO 1 (PDFs A4)',
+      desc: 'Alimenta os 2 formulários oficiais imprimíveis em A4: o ANEXO 1 — Relação dos Itens Encontrados (Manual Pág. 16/19, 15 linhas/folha, substituindo o PDF Acrobat JS) e o Relatório Final - Após o Evento.',
+      sections: [{ label: 'Campos Oficiais (Relatório + ANEXO 1)', items: ['salaoAssembleias, circuito, eventoTipo, parte (A/B), data', 'superintendente, ajudantes, voluntariosNecessarios/Usados', 'dificuldadeAntes / Durante / Apos (SIM/NÃO + texto) + sugestoes', 'responsavelRelatorio, congregacao, telefoneResponsavel, enderecoRestituicao'] }]
     },
     'mer-catalogo': {
       badge: 'Lookup • 1:N',
@@ -425,7 +425,7 @@
     'st-retido': { badge: 'Temporal (>= 60 dias)', title: 'Retido (>= 60 dias sem retirada)', desc: 'Calculado por isItemRetido(item, 60). Entra automaticamente no Deck "Destinar (SA)".', sections: [{ label: 'Destinos', items: ['→ Já Entregue (dono tardio)', '→ DESPACHADO pelo SA (DOAR | VENDER | DESCARTAR)'] }] },
     'st-entregue': { badge: 'Estado Final Positivo', title: 'Já Entregue (Dono / Retirante)', desc: 'Devolução confirmada com quem pegou, dados do dono, data/hora e Foto 3 (comprovante opcional).', sections: [{ label: 'Auditoria', items: ['Reversível via Reabertura auditada (etapa REABERTO)'] }] },
     'st-contas': { badge: 'Política §57 — Dinheiro', title: 'Entregue ao Depto. de Contas', desc: 'Dinheiro não procurado até o fim da assembleia vai ao Departamento de Contas.', sections: [{ label: 'Detecção', items: ['Automática por isCashItem()'] }] },
-    'st-despachado': { badge: 'Estado Final SA', title: 'DESPACHADO (Superintendente de Assembleia)', desc: 'SA escolhe DOAR, VENDER (conta do circuito) ou DESCARTAR no Deck Destinar.', sections: [{ label: 'Auditoria', items: ['Evento DESPACHADO_SA com operador, data/hora e destino'] }] },
+    'st-despachado': { badge: 'Estado Final SA (Reversível 7d)', title: 'DESPACHADO (Superintendente de Assembleia)', desc: 'SA escolhe DOAR, VENDER (conta do circuito) ou DESCARTAR no Deck Swipe Destinar (com Recomendação por Valor). Dentro de 7 dias, pode acionar REVERTER DESPACHADO.', sections: [{ label: 'Auditoria & Regra 7 Dias', items: ['Evento DESPACHADO_SA com operador, data/hora e destino', 'Janela < 7 dias: botão Reverter Despacho limpa destino, dataDespacho e quemPegou + grava REABERTO'] }] },
     'uc-vol': { badge: 'Ator Primário', title: 'Voluntário do Balcão', desc: 'Opera durante todo o evento (§54): cadastra itens Foto-Etiqueta-Foto, Guarda-Volumes (§58), pessoas perdidas (§56), comandos por voz, busca, conferência e entrega.', sections: [{ label: 'Casos de Uso', items: ['UC01 a UC09'] }] },
     'uc-enc': { badge: 'Ator Coordenação', title: 'Encarregado do Departamento', desc: 'Cria eventos, consolida pacotes JSON de todos os equipamentos da equipe, importa/exporta Excel e emite o Relatório Final A4.', sections: [{ label: 'Casos de Uso', items: ['UC01, UC10, UC12, UC13, UC14'] }] },
     'uc-sa': { badge: 'Ator Decisor Pós-Evento', title: 'Superintendente de Assembleia (SA)', desc: 'Avalia itens retidos há ≥60 dias no Deck Destinar para DOAR, VENDER ou DESCARTAR e recebe o Relatório Final.', sections: [{ label: 'Casos de Uso', items: ['UC11 (Destinar Retidos ≥60d)', 'UC12 (Relatório Final)'] }] },
@@ -437,7 +437,7 @@
     'cls-photo': { badge: 'Serviço Mídia', title: 'PhotoService', desc: 'Canvas resize ≤900px, JPEG 0.72 (~40 KB) e carimbo opcional de etiqueta + hora.', sections: [{ label: 'Arquivo', items: ['src/services/photoService.ts'] }] },
     'cls-voice': { badge: 'Acessibilidade pt-BR', title: 'VoiceService', desc: 'Web Speech API (SpeechRecognition + SpeechSynthesis TTS) + parser NLP multi-campo.', sections: [{ label: 'Testes', items: ['src/services/voiceService.ts (3 testes aprovados)'] }] },
     'cls-merge': { badge: 'Motor Multi-Dispositivo', title: 'MergeService', desc: 'SyncBundle V1, previewMerge com detecção de colisões e executeMerge preservando etiquetaOrigem e fotos.', sections: [{ label: 'Testes', items: ['src/services/mergeService.ts (2 testes aprovados)'] }] },
-    'cls-excel': { badge: 'Adaptador Planilha', title: 'ExcelService (SheetJS)', desc: 'Importa e exporta todas as 25 colunas de "Perdidos e Achados (Guarda-Volumes).xlsx" e CSV.', sections: [{ label: 'Validação', items: ['Validado contra 170/170 registros reais'] }] },
+    'cls-excel': { badge: 'Adaptador Planilha', title: 'ExcelService (SheetJS + PA.txt)', desc: 'Importa/exporta 25 colunas de "Perdidos e Achados (Guarda-Volumes).xlsx"/CSV e gera PA.txt (TAB) compatível com o PDF Acrobat JS legado.', sections: [{ label: 'Validação', items: ['Validado contra 170/170 registros reais'] }] },
     'cmp-pwa': { badge: 'Camada PWA', title: 'Workbox SW + Web Manifest', desc: 'Pré-cache de 69 assets para funcionamento 100% offline em PC, Android e iOS.', sections: [{ label: 'Deploy HTTPS', items: ['GitHub Pages: /assembleia-perdidos-achados-pwa/'] }] },
     'cmp-ui': { badge: 'Camada Apresentação', title: 'React 19 + Tailwind CSS v4 (7 Views)', desc: 'Sidebar PC + Bottom Nav Mobile, modais Foto-Etiqueta-Foto, Deck SA, Relatório A4 @media print e Alto Contraste.', sections: [{ label: 'Atalhos', items: ['Alt+V (Voz) • Ctrl+K (Comandos) • Alvos ≥44px'] }] },
     'cmp-store': { badge: 'Estado Global', title: 'AppProvider Context Store', desc: 'Sincroniza UI, Assistente de Voz, Toasts, TTS e persistência automática no localStorage.', sections: [{ label: 'Arquivo', items: ['src/store/useAppStore.tsx'] }] },
@@ -685,17 +685,18 @@
           { n: 'colisoesResolvidas', t: 'int' },
         ])}
 
-        ${erBox('mer-relatorio', 25, 415, 275, 'RELATORIO_FINAL (PDF A4)', P.warning, [
+        ${erBox('mer-relatorio', 25, 415, 275, 'RELATORIO_FINAL + ANEXO 1', P.warning, [
           { k: 'PK', n: 'id', t: 'rel_*' },
           { k: 'FK', n: 'eventoId (UNIQUE)', t: 'EVENTO.id' },
+          { n: 'salaoAssembleias', t: 'Guarapari (ANEXO 1)' },
           { n: 'circuito / parte', t: 'ES-005 / A|B' },
-          { n: 'departamento', t: 'PA / Guarda-Vol.' },
           { n: 'superint. / ajudantes', t: 'string' },
           { n: 'volNec / volUsados', t: 'int / int' },
           { n: 'difAntes / Dur. / Apos', t: 'bool + text' },
           { n: 'sugestoes', t: 'text' },
           { n: 'responsavel / cong.', t: 'string' },
-          { n: 'cidade / data / assin.', t: 'Guarapari/ES' },
+          { n: 'telefoneResponsavel', t: 'ANEXO 1 restituicao' },
+          { n: 'enderecoRestituicao', t: 'ANEXO 1 restituicao' },
         ])}
 
         ${erBox('mer-procurado', 385, 585, 420, 'ITEM_PROCURADO', P.teal, [
@@ -809,9 +810,11 @@
         <path d="M 690 554 L 822 554 L 822 280 L 860 280" stroke="${P.success}" stroke-width="1.8" stroke-dasharray="5 3" fill="none" marker-end="url(#arrow-success)"/>
         <text x="756" y="546" text-anchor="middle" font-size="10" font-weight="700" fill="${P.success}">Dono tardio</text>
 
-        ${stateNode('st-despachado', 855, 535, 275, 74, 'DESPACHADO (SA)', 'DOAR | VENDER (Circuito) | DESCARTAR', P.muted)}
+        ${stateNode('st-despachado', 855, 535, 275, 74, 'DESPACHADO (SA)', 'DOAR | VENDER | DESCARTAR (Reverter <7d)', P.muted)}
         <path d="M 690 578 L 850 578" stroke="${P.primary}" stroke-width="2.4" marker-end="url(#arrow-primary)"/>
         <text x="770" y="596" text-anchor="middle" font-size="10.5" font-weight="800" fill="${P.primary}">Decisão SA</text>
+        <path d="M 992 535 L 992 480 L 745 480 L 745 436" stroke="${P.error}" stroke-width="1.7" stroke-dasharray="5 3" fill="none" marker-end="url(#arrow)"/>
+        <text x="875" y="472" text-anchor="middle" font-size="10" font-weight="700" fill="${P.error}">Reverter Despacho (&lt; 7 dias)</text>
 
         <circle cx="1168" cy="259" r="11" fill="none" stroke="${P.fg}" stroke-width="2"/><circle cx="1168" cy="259" r="6" fill="${P.fg}"/>
         <path d="M 1120 259 L 1152 259" stroke="${P.muted}" stroke-width="2" marker-end="url(#arrow)"/>
@@ -828,20 +831,20 @@
   // ---------- 3. UML USE CASES ----------
   function renderUseCases() {
     const ucs = [
-      { id: 'UC01', x: 380, y: 105, txt: 'UC01 • Selecionar / Criar Evento', node: 'uc-vol' },
-      { id: 'UC02', x: 380, y: 178, txt: 'UC02 • Cadastrar (Foto 1→Etq→Foto 2)', node: 'uc-vol' },
+      { id: 'UC01', x: 380, y: 105, txt: 'UC01 • Selecionar / Abrir-Fechar Evento', node: 'uc-vol' },
+      { id: 'UC02', x: 380, y: 178, txt: 'UC02 • Cadastrar (Foto 1→Etq→Foto 2 • 15l)', node: 'uc-vol' },
       { id: 'UC03', x: 380, y: 251, txt: 'UC03 • Registrar Guarda-Volumes (§58)', node: 'uc-vol' },
       { id: 'UC04', x: 380, y: 324, txt: 'UC04 • Protocolo Criança/Pessoa (§56)', node: 'uc-vol' },
       { id: 'UC05', x: 380, y: 397, txt: 'UC05 • Comandos & Ditado por Voz (pt-BR)', node: 'uc-vol' },
-      { id: 'UC06', x: 380, y: 470, txt: 'UC06 • Buscar, Filtrar & Conferir (§55)', node: 'uc-vol' },
+      { id: 'UC06', x: 380, y: 470, txt: 'UC06 • Buscar / 5 Seções Glide / Conferir', node: 'uc-vol' },
       { id: 'UC07', x: 380, y: 543, txt: 'UC07 • Entregar + Foto 3 + Rastreio', node: 'uc-vol' },
 
       { id: 'UC08', x: 760, y: 135, txt: 'UC08 • Cadastrar & Cruzar Procurados', node: 'uc-vol' },
       { id: 'UC09', x: 760, y: 215, txt: 'UC09 • Imprimir Etiquetas Gêmeas', node: 'uc-vol' },
       { id: 'UC10', x: 760, y: 295, txt: 'UC10 • Encaminhar Dinheiro Contas (§57)', node: 'uc-enc' },
-      { id: 'UC11', x: 760, y: 375, txt: 'UC11 • Destinar Retidos ≥60d (Deck SA)', node: 'uc-sa' },
-      { id: 'UC12', x: 760, y: 455, txt: 'UC12 • Emitir & Imprimir Relatório A4', node: 'uc-enc' },
-      { id: 'UC13', x: 760, y: 535, txt: 'UC13 • Importar / Exportar Excel (.xlsx)', node: 'uc-enc' },
+      { id: 'UC11', x: 760, y: 375, txt: 'UC11 • Destinar Swipe ≥60d / Reverter <7d', node: 'uc-sa' },
+      { id: 'UC12', x: 760, y: 455, txt: 'UC12 • Imprimir ANEXO 1 (15l) + Relat. A4', node: 'uc-enc' },
+      { id: 'UC13', x: 760, y: 535, txt: 'UC13 • Import/Export Excel & PA.txt', node: 'uc-enc' },
       { id: 'UC14', x: 760, y: 615, txt: 'UC14 • Exportar & Mesclar Dispositivos', node: 'uc-dev' },
     ];
     const ucById = Object.fromEntries(ucs.map(u => [u.id, u]));
@@ -948,12 +951,15 @@
           '+ localizacao?: string',
         ], ['+ createTrackingEvent(params): RastreioEvento'])}
 
-        ${umlClassBox('mer-evento', 28, 312, 332, 'Entity', 'Evento & RelatorioFinal', P.warning, [
-          '+ id / tipo / codigo / circuito / parte',
+        ${umlClassBox('mer-evento', 28, 312, 332, 'Entity', 'Evento & RelatorioFinal/Anexo1', P.warning, [
+          '+ id / tipo / codigo / status(ABRIR|FECHAR)',
           '+ data / local / proximaEtiqueta',
-          '+ dificuldadeAntes / Durante / Apos',
-          '+ voluntariosNecessarios / Usados',
-        ], ['+ getNextTagForEvent(eventoId)'])}
+          '+ salaoAssembleias / telefone / endRestituicao',
+          '+ difAntes / Dur. / Apos • volNec/Usados',
+        ], [
+          '+ getNextTagForEvent(eventoId)',
+          '+ getSuggestedFormPage(eventoId) // 15l',
+        ])}
 
         ${umlClassBox('cls-storage', 28, 515, 290, 'Service', 'StorageService', P.purple, [
           '+ STORAGE_KEY: string',
@@ -992,10 +998,11 @@
         ])}
 
         ${umlClassBox('cls-excel', 958, 540, 265, 'Adapter', 'ExcelService (SheetJS)', P.warning, [
-          '25 colunas Excel / CSV',
+          '25 cols Excel/CSV + PA.txt',
         ], [
           '+ importFromSpreadsheetBuffer()',
           '+ exportToSpreadsheet(db, fmt)',
+          '+ exportToAcrobatTxt(db, evId)',
         ])}
       </svg>`
     };
