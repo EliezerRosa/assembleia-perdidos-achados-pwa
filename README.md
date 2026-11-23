@@ -32,8 +32,9 @@ Baseado no fluxo operacional da planilha `Perdidos e Achados (Guarda-Volumes).xl
    - Retorno falado (TTS), modo **Alto Contraste** e controle de tamanho da fonte (`Normal` / `Grande` / `Extra`).
 5. **Itens Procurados com Correspondência Inteligente**
    - Registro de solicitações com foto de referência e pontuação automática de similaridade contra todos os itens cadastrados (incluindo os já entregues para rastreio).
-6. **Relatório Final Oficial (A4 / PDF)**
-   - Espelho fiel do `Relatório Final - Após o Evento` (Guarapari/ES) preenchível por voz, com resumo estatístico automático do evento e layout de impressão A4 limpo (`@media print`).
+6. **Relatório Final Oficial & ANEXO 1 (Relação dos Itens Encontrados — 15 linhas/pág. A4)**
+   - **ANEXO 1 (Manual de Funcionamento Pág. 16/19):** substitui o antigo PDF com JavaScript embutido (`PA.txt`), gerando automaticamente folhas A4 de 15 itens por página (ignorando *"Já Entregue"* por padrão, ou paginando por `Form Página`), com impressão multi-página em 1 clique + exportação opcional de `PA.txt` compatível com o PDF legado.
+   - **Relatório Final — Após o Evento (Guarapari/ES):** preenchível por voz, com resumo estatístico automático e layout de impressão A4 limpo (`@media print`).
 7. **Exportação, Importação & Mesclagem Multi-Dispositivo + Excel**
    - Exportação de pacote JSON completo (com fotos e rastreio) + compartilhamento nativo (`Web Share API` para WhatsApp/Bluetooth/Drive).
    - **Importação com Pré-visualização e Resolução de Colisões de Etiquetas** (renumerar automaticamente preservando `etiquetaOrigem`, prefixo por equipamento ou manter), permitindo juntar registros de vários celulares e PCs em um único aparelho.

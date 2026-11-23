@@ -139,6 +139,9 @@ export interface RelatorioFinal {
   sugestoes: string;
   responsavelRelatorio: string;
   congregacaoResponsavel: string;
+  salaoAssembleias?: string;
+  telefoneResponsavel?: string;
+  enderecoRestituicao?: string;
   cidadeAssinatura: string;
   dataAssinatura: string;
   assinaturaNome: string;

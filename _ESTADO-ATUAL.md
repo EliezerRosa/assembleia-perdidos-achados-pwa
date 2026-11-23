@@ -27,7 +27,7 @@
   - `photoService.ts` — Compressão Canvas JPEG + carimbo opcional de etiqueta/hora.
   - `trackingService.ts` — Máquina de estados, regras §55–58, retenção `>= 60d` e rastreio imutável.
   - `mergeService.ts` — Exportação `SyncBundle`, `previewMerge` e `executeMerge` multi-dispositivo.
-  - `excelService.ts` — Importação/exportação `.xlsx` e `.csv` compatível com as 25 colunas do Glide/Excel.
+  - `excelService.ts` — Importação/exportação `.xlsx`, `.csv` (25 colunas) e `PA.txt` (compatível com PDF Acrobat JS legado).
   - `voiceService.ts` — Reconhecimento de voz `pt-BR`, TTS e parser de comandos/formulário multi-campo.
 - `src/store/useAppStore.tsx` — Estado global reativo sincronizado com `localStorage`.
 - `src/components/views/` — 7 telas completas + 2 modais (`DashboardEventsView`, `ItemsListView`, `ItemFormModal`, `ItemDetailModal`, `WantedItemsView`, `DestinationDeckView`, `FinalReportView`, `SyncHubView`, `ArchitectureView`).

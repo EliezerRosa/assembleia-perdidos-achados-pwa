@@ -380,3 +380,40 @@ export function exportToSpreadsheet(
     filename: `Perdidos_e_Achados${evtSlug}_${dateTag}.xlsx`,
   };
 }
+
+/**
+ * Exporta arquivo PA.txt delimitado por TAB 100% compatível com o script JavaScript
+ * embutido no PDF legado Anexo 1 (importTextData(".../PA.txt", H)).
+ */
+export function exportToAcrobatTxt(
+  db: AppDatabase,
+  eventoId?: string,
+): { blob: Blob; filename: string } {
+  const eventosById = new Map(db.eventos.map((e) => [e.id, e]));
+  const targetItens = eventoId ? db.itens.filter((i) => i.eventoId === eventoId) : db.itens;
+
+  const sanitize = (v: unknown) =>
+    String(v ?? '')
+      .replace(/\t/g, ' ')
+      .replace(/\r?\n/g, ' ')
+      .trim();
+
+  const header = ['Form Página', 'Evento Código', 'Evento Data', 'STATUS', 'DESC', 'Row ID'].join('\t');
+  const lines = targetItens.map((item) => {
+    const ev = eventosById.get(item.eventoId);
+    return [
+      sanitize(item.formPagina || 1),
+      sanitize(ev?.codigo ?? ''),
+      sanitize(ev?.data ?? ''),
+      sanitize(item.status),
+      sanitize(buildLegacyDesc(item)),
+      sanitize(item.id),
+    ].join('\t');
+  });
+
+  const content = [header, ...lines].join('\r\n');
+  return {
+    blob: new Blob([content], { type: 'text/plain;charset=utf-8;' }),
+    filename: 'PA.txt',
+  };
+}

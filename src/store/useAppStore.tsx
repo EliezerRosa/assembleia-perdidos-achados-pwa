@@ -245,8 +245,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   );
 
   /**
-   * Espelha a lógica do Glide (ÚltimaPágina + QtasLinhasÚltimaPágina):
-   * cada folha física S-22 comporta ~18 registros antes de avançar para a próxima página.
+   * Espelha a lógica do Glide + Anexo 1 (Manual Pág. 16/19: linhas 1..15 = 15 itens por folha):
+   * cada folha física comporta 15 itens antes de avançar automaticamente para a próxima página.
    */
   const getSuggestedFormPage = useCallback(
     (eventoId: string) => {
@@ -254,7 +254,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (evItems.length === 0) return 1;
       const lastPage = evItems.reduce((acc, i) => Math.max(acc, i.formPagina || 1), 1);
       const countOnLastPage = evItems.filter((i) => (i.formPagina || 1) === lastPage).length;
-      return countOnLastPage >= 18 ? lastPage + 1 : lastPage;
+      return countOnLastPage >= 15 ? lastPage + 1 : lastPage;
     },
     [db.itens],
   );

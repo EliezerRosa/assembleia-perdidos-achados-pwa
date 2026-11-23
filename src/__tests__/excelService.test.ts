@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import * as XLSX from 'xlsx';
-import { exportToSpreadsheet, importFromSpreadsheetBuffer } from '../services/excelService';
+import { exportToAcrobatTxt, exportToSpreadsheet, importFromSpreadsheetBuffer } from '../services/excelService';
 import { createEmptyDatabase } from '../services/storageService';
 
 describe('excelService — Compatibilidade com Planilha Perdidos e Achados (Guarda-Volumes)', () => {
-  it('importa formato exato das 25 colunas da planilha Glide/Excel e ignora linhas vazias e duplicadas', () => {
+  it('importa formato exato das 25 colunas da planilha Glide/Excel e ignora linhas vazias e duplicadas', async () => {
     const sampleRows = [
       // Linha vazia (igual linha 2 do Excel real)
       {},
@@ -84,5 +84,11 @@ describe('excelService — Compatibilidade com Planilha Perdidos e Achados (Guar
 
     const csvExport = exportToSpreadsheet(res1.db, 'csv');
     expect(csvExport.filename.endsWith('.csv')).toBe(true);
+
+    const txtExport = exportToAcrobatTxt(res1.db);
+    expect(txtExport.filename).toBe('PA.txt');
+    const txtContent = await txtExport.blob.text();
+    expect(txtContent).toContain('Form Página\tEvento Código\tEvento Data\tSTATUS\tDESC\tRow ID');
+    expect(txtContent).toContain('Etiqueta = 1');
   });
 });
