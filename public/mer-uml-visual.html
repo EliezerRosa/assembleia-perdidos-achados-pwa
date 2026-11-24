@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MER &amp; UML Gráfico-Visual — Perdidos e Achados &amp; Guarda-Volumes PWA</title>
+  <title>MER &amp; UML Gráfico-Visual — Suíte Eventos PWA (3 Apps Embutidos)</title>
   <style>
     /* Self-contained offline layout CSS (zero external CDN required) */
     *, *::before, *::after { box-sizing: border-box; }
@@ -131,10 +131,10 @@
         </div>
         <div>
           <h1 class="text-base font-extrabold tracking-tight leading-tight">
-            MER &amp; UML Gráfico-Visual — Perdidos e Achados &amp; Guarda-Volumes PWA
+            MER &amp; UML Gráfico-Visual — Suíte Eventos PWA (Achados • Presidência • A Sentinela)
           </h1>
           <p id="header-sub" class="text-xs">
-            Arraste o diagrama para mover • Role ou use +/− para zoom • Clique em qualquer bloco para inspecionar chaves, regras §54–58 e colunas Excel
+            Arraste o diagrama para mover • Role ou use +/− para zoom • Clique em qualquer bloco para inspecionar chaves PK/FK, regras §54–58, Cronômetro e Cascata 30s
           </p>
         </div>
       </div>
@@ -153,20 +153,23 @@
 
     <!-- Main Tabs -->
     <nav id="tabs" class="max-w-[1680px] mx-auto mt-3 flex flex-wrap gap-1.5" aria-label="Diagramas MER e UML">
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="mer" data-active="true">1. MER (Pé-de-Galinha)</button>
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="states" data-active="false">2. UML • Estados (Ciclo de Vida)</button>
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="usecases" data-active="false">3. UML • Casos de Uso</button>
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="classes" data-active="false">4. UML • Classes</button>
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="sequence" data-active="false">5. UML • Sequências (3 Fluxos)</button>
-      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="components" data-active="false">6. UML • Componentes PWA</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="mer" data-active="true">1. MER • Achados &amp; GV</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="merSuite" data-active="false">2. MER • Presidência &amp; Sentinela</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="states" data-active="false">3. UML • Estados (Ciclo de Vida)</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="usecases" data-active="false">4. UML • Casos de Uso</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="classes" data-active="false">5. UML • Classes</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="sequence" data-active="false">6. UML • Sequências (5 Fluxos)</button>
+      <button class="tab-btn px-3.5 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition" data-tab="components" data-active="false">7. UML • Componentes PWA</button>
     </nav>
 
     <!-- Subtabs for Sequence -->
     <div id="seq-subtabs" class="hidden max-w-[1680px] mx-auto mt-2.5 pt-2.5 border-t flex flex-wrap items-center gap-1.5 text-xs">
       <span id="seq-label" class="font-semibold mr-1">Fluxo de Sequência:</span>
-      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="intake" data-active="true">A. Recepção (Voz + Foto 1 → Etiqueta → Foto 2)</button>
-      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="delivery" data-active="false">B. Conferência (§55) &amp; Entrega + Rastreio</button>
-      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="merge" data-active="false">C. Mesclagem Multi-Dispositivo (Mobile ↔ PC)</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="intake" data-active="true">A. Recepção (Voz + Foto 1 → Etq → Foto 2)</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="delivery" data-active="false">B. Conferência (§55) &amp; Entrega</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="merge" data-active="false">C. Mesclagem Multi-Dispositivo (3 Apps)</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="presidencia" data-active="false">D. Presidência (Cronômetro + Guia A/V)</button>
+      <button class="subtab-btn px-3 py-1 rounded-lg border cursor-pointer font-semibold" data-seq="sentinela" data-active="false">E. Resumo de A Sentinela (Cascata 30s + Áudio)</button>
     </div>
   </header>
 
@@ -441,7 +444,15 @@
     'cmp-pwa': { badge: 'Camada PWA', title: 'Workbox SW + Web Manifest', desc: 'Pré-cache de 69 assets para funcionamento 100% offline em PC, Android e iOS.', sections: [{ label: 'Deploy HTTPS', items: ['GitHub Pages: /assembleia-perdidos-achados-pwa/'] }] },
     'cmp-ui': { badge: 'Camada Apresentação', title: 'React 19 + Tailwind CSS v4 (7 Views)', desc: 'Sidebar PC + Bottom Nav Mobile, modais Foto-Etiqueta-Foto, Deck SA, Relatório A4 @media print e Alto Contraste.', sections: [{ label: 'Atalhos', items: ['Alt+V (Voz) • Ctrl+K (Comandos) • Alvos ≥44px'] }] },
     'cmp-store': { badge: 'Estado Global', title: 'AppProvider Context Store', desc: 'Sincroniza UI, Assistente de Voz, Toasts, TTS e persistência automática no localStorage.', sections: [{ label: 'Arquivo', items: ['src/store/useAppStore.tsx'] }] },
-    'cmp-apis': { badge: 'Web APIs Nativas', title: 'Hardware & Storage do Dispositivo', desc: 'localStorage, Camera API, Web Speech API, Web Share API e window.print() sem backend.', sections: [{ label: 'Plataformas', items: ['Chrome/Edge PC, Android Chrome, iOS Safari'] }] },
+    'cmp-apis': { badge: 'Web APIs Nativas', title: 'Hardware & Storage do Dispositivo', desc: 'localStorage v2, Camera API, MediaRecorder (16kbps), Web Speech API, Web Share API e window.print() sem backend.', sections: [{ label: 'Plataformas', items: ['Chrome/Edge PC, Android Chrome, iOS Safari'] }] },
+    'mer-voluntario': { badge: 'Backbone Compartilhado • PK: id', title: 'VOLUNTARIO (Equipe, Oradores & Comentaristas)', desc: 'Cadastro unificado que alimenta Presidência, Demonstrações/Entrevistas e a Galeria de Palco do Resumo de A Sentinela.', sections: [{ label: 'Atributos & Elegibilidade', items: ['departamento (15), areaDesignacao (5), funcaoSetor (6)', 'habilitadoSentinela, habilitadoDemos, foto (avatar/galeria)', 'Relaciona-se 1:N com ProgramaParte, Participacao e SentinelaComentario'] }] },
+    'mer-programa': { badge: 'App 2 • Presidência (166 cols Glide)', title: 'PROGRAMA_PARTE (Grade 3d×2t & Cronômetro)', desc: 'Gerencia cada parte do congresso: orador titular, 3 substitutos (1º/2º/3º), Check-in em 3 etapas, Ensaio no Palco e Cronômetro Dual-Mode (Ao Vivo vs Ensaio Pessoal) com alertas -1 min e estouro.', sections: [{ label: 'Check-in & Cronômetro', items: ['(1) 1º Dia • (2) 30m Dia • (3) 30m Palco + Ensaio Palco', 'modoCronometro: parado | ao_vivo | ensaio_pessoal | concluido', 'WhatsApp modelo Salmo 134:3 + Clonagem de Orador'] }] },
+    'mer-participacao': { badge: 'App 2 • Programa Parte', title: 'PARTICIPACAO_PROGRAMA (Demos & Entrevistas)', desc: 'Liga voluntários às partes do programa para Experiências, Demonstrações, Encenações, Entrevistas e Comentários, com orientações de palco e status de ensaio.', sections: [{ label: 'Atributos', items: ['tipoParticipacao (5 tipos), descricao, orientacoes', 'diaHoraEnsaio, presenteDia1, ensaioConfirmado'] }] },
+    'mer-guiaav': { badge: 'App 2 • Áudio & Vídeo', title: 'GUIA_AUDIO_VIDEO (Dica Play + Ativar Play)', desc: 'Roteiro de mídias por Parte e Seção com a deixa verbal/visual exata (Dica Play) e alternância entre Modo Edição e Modo Ativar Play ao vivo.', sections: [{ label: 'Atributos', items: ['secaoSequencia/Topico/Tempo • midiaTipo/Sequencia/TempoSeg', 'dicaPlay (deixa operador) • executado (PLAY OK)'] }] },
+    'mer-lembrete': { badge: 'App 2 • Agenda & RBAC', title: 'LEMBRETE_AGENDA & DOCUMENTO_REFERENCIA', desc: 'Compromissos de Agenda (ehAgenda=true), Lembretes filtrados por 7 perfis RBAC com marcação Já Lido e Feito, e documentos oficiais (CO-10, CO-160, CCO-pgm, CO-90).', sections: [{ label: '7 Perfis RBAC', items: ['Todos, Presidente, Equipe Presidência, Sup. Programa, Presidente Sessão, Áudio e Vídeo, Orador'] }] },
+    'mer-sentinela-estudo': { badge: 'App 3 • Cabeçalho Sentinela', title: 'SENTINELA_ESTUDO', desc: 'Define o artigo, texto base, objetivo, cânticos, hora de início (base da cascata cronológica) e dirigente do Resumo de A Sentinela.', sections: [{ label: 'Cronograma', items: ['horaInicio (ex.: 10:30) + duracaoPrevistaMin (30 min)', 'Calcula horaFimTotal em cascata somando tempoSegundos de cada comentário'] }] },
+    'mer-sentinela-com': { badge: 'App 3 • Ordem & Palco', title: 'SENTINELA_COMENTARIO (Cascata 30s & Áudio)', desc: 'Controla ordem de entrada (1..N), lado no palco (ESQUERDA/DIREITA/TRIBUNA com banner #FFD700 e detecção de repetição), substituto, imagem A/V (EXIBIR esta imagem), áudio offline e Salvar/Recuperar snapshot.', sections: [{ label: 'Dinâmica Completa', items: ['ordenacao (↑/↓) + tempoSegundos (padrão 30s) -> cascata HH:MM:SS', 'presenteDia1 + ensaioPalcoFeito (Dom 8:30) + jaFeito', 'backupSnapshot (Salvar/Recuperar) + Player Áudio Completo TTS'] }] },
+    'mer-conversa': { badge: 'Chat Contextual • Conversas', title: 'CONVERSA_MENSAGEM (Conversar Com Todos)', desc: 'Mural de recados e alinhamento por estudo, comentário específico ou parte do programa.', sections: [{ label: 'Contextos', items: ['sentinela_estudo | sentinela_comentario | programa_parte'] }] },
   };
 
   let selectedNodeId = null;
@@ -707,6 +718,126 @@
           { n: 'foto', t: 'DataURL (ref. WhatsApp)' },
           { k: 'FK', n: 'provaveisItensIds[]', t: 'ITEM.id[] (N:M)' },
           { n: 'status', t: 'PROCURANDO|LOCALIZADO|ENTREGUE' },
+        ])}
+      </svg>`
+    };
+  }
+
+  // ---------- 1B. MER SUITE (PRESIDÊNCIA + RESUMO DE A SENTINELA) ----------
+  function renderMERSuite() {
+    return {
+      title: 'MER — Apps Embutidos: Presidência do Congresso & Resumo de A Sentinela (Schema v2)',
+      subtitle: '9 entidades adicionais integradas ao mesmo EVENTO e VOLUNTARIO • Cascata 30s • Guia A/V • 3 Substitutos',
+      legend: `
+        <span class="inline-flex items-center gap-1.5"><span style="background:${P.primary}" class="w-2.5 h-2.5 rounded-sm inline-block"></span> Presidência</span>
+        <span class="inline-flex items-center gap-1.5"><span style="background:${P.warning}" class="w-2.5 h-2.5 rounded-sm inline-block"></span> A Sentinela</span>
+        <span class="inline-flex items-center gap-1.5"><span style="background:${P.teal}" class="w-2.5 h-2.5 rounded-sm inline-block"></span> Equipe / Chat</span>
+      `,
+      defaultNode: 'mer-programa',
+      svg: `<svg viewBox="0 0 1280 860" width="1280" height="860" xmlns="http://www.w3.org/2000/svg">
+        ${svgDefs()}
+        <path d="M 285 110 L 385 110" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 285 360 L 385 260" stroke="${P.teal}" stroke-width="2" stroke-dasharray="5 3" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 795 140 L 895 115" stroke="${P.primary}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 795 270 L 895 310" stroke="${P.purple}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 155 205 L 155 270" stroke="${P.teal}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 155 520 L 155 580" stroke="${P.warning}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 285 695 L 385 645" stroke="${P.warning}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 795 660 L 895 660" stroke="${P.teal}" stroke-width="2.2" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+        <path d="M 795 415 L 895 495" stroke="${P.blue}" stroke-width="1.8" stroke-dasharray="5 3" fill="none" marker-start="url(#crow-one)" marker-end="url(#crow-many)"/>
+
+        ${erBox('mer-evento', 25, 25, 260, 'EVENTO (Compartilhado)', P.blue, [
+          { k: 'PK', n: 'id', t: 'fk_id_Eventos' },
+          { n: 'tipo / codigo', t: 'Congresso / CO-ES005' },
+          { n: 'data / local', t: '3 dias • Salão' },
+          { n: 'status', t: 'ativo | encerrado' },
+        ])}
+
+        ${erBox('mer-voluntario', 25, 270, 260, 'VOLUNTARIO (Equipe)', P.teal, [
+          { k: 'PK', n: 'id', t: 'vol_*' },
+          { k: 'FK', n: 'eventoId', t: 'EVENTO.id' },
+          { n: 'nome / congreg.', t: 'string' },
+          { n: 'telefone / foto', t: 'WhatsApp + Galeria' },
+          { n: 'departamento', t: '15 deptos' },
+          { n: 'funcaoSetor', t: 'Pres|Sup|Cap|Vol' },
+          { n: 'habilitadoSentinela', t: 'boolean' },
+          { n: 'habilitadoDemos', t: 'boolean' },
+        ])}
+
+        ${erBox('mer-sentinela-estudo', 25, 580, 260, 'SENTINELA_ESTUDO', P.warning, [
+          { k: 'PK', n: 'id', t: 'snt_*' },
+          { k: 'FK', n: 'eventoId', t: 'EVENTO.id' },
+          { n: 'tituloArtigo', t: 'string' },
+          { n: 'textoBase / obj.', t: 'string' },
+          { n: 'canticoIni / Fim', t: 'string' },
+          { n: 'dia / horaInicio', t: 'Dom 10:30 (cascata)' },
+          { n: 'duracaoPrevistaMin', t: '30 min' },
+          { n: 'dirigenteNome', t: 'string' },
+        ])}
+
+        ${erBox('mer-programa', 385, 25, 410, 'PROGRAMA_PARTE (Presidência)', P.primary, [
+          { k: 'PK', n: 'id', t: 'prg_*' },
+          { k: 'FK', n: 'eventoId', t: 'EVENTO.id' },
+          { n: 'dia / dataHoraInicio', t: 'Sex|Sáb|Dom (Manhã/Tarde)' },
+          { n: 'tempoProgramadoMin', t: 'int (calcula fim)' },
+          { n: 'tipo / formato', t: '14 tipos • Ao Vivo|Vídeo|Áudio' },
+          { n: 'tema / ehSerie', t: 'string / boolean' },
+          { k: 'FK', n: 'oradorId / Nome', t: 'VOLUNTARIO (Titular)' },
+          { n: 'substitutos[1..3]', t: '🥇 1º • 🥈 2º • 🥉 3º' },
+          { n: 'checkInDia1 / 30mDia', t: 'Etapas (1) e (2)' },
+          { n: 'checkIn30mPalco', t: 'Etapa (3)' },
+          { n: 'ensaioPalcoFeito', t: 'boolean (Ao Vivo)' },
+          { n: 'modoCronometro', t: 'parado|ao_vivo|ensaio|fim' },
+          { n: 'inicioReal / duracao', t: 'Alertas -1m / Estouro' },
+        ])}
+
+        ${erBox('mer-sentinela-com', 385, 470, 410, 'SENTINELA_COMENTARIO (Ordem Cascata)', P.warning, [
+          { k: 'PK', n: 'id', t: 'scm_*' },
+          { k: 'FK', n: 'estudoId', t: 'SENTINELA_ESTUDO.id' },
+          { n: 'ordenacao', t: '1..N (↑/↓ recalcula cascata)' },
+          { n: 'subtopico / parag.', t: 'string / "1-2 (a/b)"' },
+          { n: 'pergunta / resposta', t: 'Roteiro dirigente' },
+          { n: 'comentario / conect.', t: 'Texto + Texto Bíblico' },
+          { n: 'tempoSegundos', t: '30s padrão (cascata)' },
+          { n: 'posicaoPalco', t: 'ESQUERDA|DIREITA|TRIBUNA' },
+          { k: 'FK', n: 'comentaristaId / Sub', t: 'Titular + Substituto' },
+          { n: 'dia1 / ensaio / feito', t: 'Dom 8:30 + checkoff' },
+          { n: 'imagemRelacionada', t: 'EXIBIR esta imagem A/V' },
+          { n: 'audio* / backupSnap', t: 'MediaRecorder + Salvar/Rec.' },
+        ])}
+
+        ${erBox('mer-participacao', 895, 25, 360, 'PARTICIPACAO_PROGRAMA (Demos)', P.success, [
+          { k: 'PK', n: 'id', t: 'prt_*' },
+          { k: 'FK', n: 'programaParteId', t: 'PROGRAMA_PARTE.id' },
+          { k: 'FK', n: 'voluntarioId', t: 'VOLUNTARIO.id' },
+          { n: 'tipoParticipacao', t: 'Demo|Entrev|Exp|Encen' },
+          { n: 'descricao / orient.', t: 'Instruções de palco' },
+          { n: 'diaHoraEnsaio', t: 'datetime' },
+          { n: 'presenteDia1 / ensaio', t: 'boolean / boolean' },
+        ])}
+
+        ${erBox('mer-guiaav', 895, 240, 360, 'GUIA_AUDIO_VIDEO (Dica Play)', P.purple, [
+          { k: 'PK', n: 'id', t: 'gav_*' },
+          { k: 'FK', n: 'programaParteId', t: 'PROGRAMA_PARTE.id' },
+          { n: 'secaoSeq / Topico', t: 'Reusável por parte' },
+          { n: 'midiaTipo / Seq / Seg', t: 'Vídeo|Áudio|Imagem|Slide' },
+          { n: 'dicaPlay', t: 'Deixa exata operador' },
+          { n: 'executado', t: 'Toggle Ativar Play' },
+        ])}
+
+        ${erBox('mer-lembrete', 895, 440, 360, 'LEMBRETE_AGENDA & REF_DOCS', P.blue, [
+          { k: 'PK', n: 'id', t: 'lem_* / ref_*' },
+          { k: 'FK', n: 'eventoId / parteId', t: 'Vínculo opcional' },
+          { n: 'ehAgenda / audiencia', t: 'Agenda ou 7 Perfis RBAC' },
+          { n: 'concluidoPorOp[]', t: 'Já Lido e Feito' },
+          { n: 'codigoDoc / categoria', t: 'CO-10, CO-160, CO-90' },
+        ])}
+
+        ${erBox('mer-conversa', 895, 625, 360, 'CONVERSA_MENSAGEM (Chat)', P.teal, [
+          { k: 'PK', n: 'id', t: 'msg_*' },
+          { n: 'contextoTipo / Id', t: 'estudo | comentario | parte' },
+          { n: 'autorNome / texto', t: 'Conversar Com Todos' },
+          { n: 'timestamp', t: 'ISO-8601' },
         ])}
       </svg>`
     };
@@ -1125,8 +1256,66 @@
       };
     }
 
+    if (activeSeq === 'presidencia') {
+      return {
+        title: 'UML Sequência D — Presidência do Congresso: Check-in, Cronômetro Ao Vivo & Guia A/V',
+        subtitle: 'Orador titular + 3 substitutos, alertas -1 min / estouro e deixa Dica Play em tempo real',
+        legend: '<span>App Embutido 2 — Presidência do Congresso</span>',
+        defaultNode: 'mer-programa',
+        svg: buildSequenceSvg(
+          [
+            { title: 'Presidente', sub: 'Sup. Programa', c: P.blue, node: 'mer-programa' },
+            { title: 'ProgramaView', sub: 'Evento em Foco', c: P.primary, node: 'mer-programa' },
+            { title: 'PresidenciaSvc', sub: 'Cronômetro & KPIs', c: P.success, node: 'mer-programa' },
+            { title: 'Guia Áudio/Vídeo', sub: 'Ativar Play', c: P.purple, node: 'mer-guiaav' },
+            { title: 'localStorage v2', sub: 'Persistência', c: P.teal, node: 'cls-storage' },
+          ],
+          [
+            { from: 0, to: 1, label: 'Marca Check-in 1º Dia, 30m Dia, 30m Palco + Ensaio OK', c: P.blue },
+            { from: 1, to: 4, label: 'Salva flags e log WhatsApp (Salmo 134:3)', c: P.teal },
+            { from: 0, to: 1, label: 'Clica "INÍCIO da Parte (Ao Vivo)" (ou Ensaio Pessoal)', c: P.success },
+            { from: 1, to: 2, label: 'computeStopwatchStatus(parte, nowMs) a cada 1s', c: P.primary },
+            { from: 2, to: 1, label: 'Dispara alerta Âmbar (-1 min) ou Vermelho (PASSOU DA HORA)', ret: true, c: P.warning },
+            { from: 0, to: 3, label: 'Lê Dica Play embarcada e confirma "▶ PLAY OK"', c: P.purple },
+            { from: 0, to: 1, label: 'Clica "FIM da Parte" → congela duracaoRealSegundos', c: P.success },
+            { from: 1, to: 4, label: 'Persiste parte concluída e destaca próxima parte na fila', c: P.teal },
+          ],
+          'Contingência: se o orador titular não confirmar no 1º dia, o botão "Promover p/ Titular" ativa o 1º/2º/3º Substituto em 1 toque!'
+        )
+      };
+    }
+
+    if (activeSeq === 'sentinela') {
+      return {
+        title: 'UML Sequência E — Resumo de A Sentinela: Cascata 30s, Palco & Áudio Completo',
+        subtitle: 'Ordem de entrada dinâmica, validação ESQUERDA ↔ DIREITA, backup e ensaio em áudio',
+        legend: '<span>App Embutido 3 — Resumo de A Sentinela</span>',
+        defaultNode: 'mer-sentinela-com',
+        svg: buildSequenceSvg(
+          [
+            { title: 'Dirigente / Palco', sub: 'Coordenação', c: P.warning, node: 'mer-sentinela-estudo' },
+            { title: 'SentinelaView', sub: 'Ordem & Galeria', c: P.primary, node: 'mer-sentinela-com' },
+            { title: 'SentinelaSvc', sub: 'Motor Cascata', c: P.success, node: 'mer-sentinela-com' },
+            { title: 'MediaRecorder/TTS', sub: 'Áudio Offline', c: P.purple, node: 'cls-voice' },
+            { title: 'localStorage v2', sub: 'Backup Snapshot', c: P.teal, node: 'cls-storage' },
+          ],
+          [
+            { from: 0, to: 1, label: 'Reordena comentário (↑/↓) ou altera tempo (padrão 30s)', c: P.warning },
+            { from: 1, to: 2, label: 'reorderSentinelaComentario() + computeSentinelaSchedule()', c: P.primary },
+            { from: 2, to: 1, label: 'Recalcula HH:MM:SS em cascata + alerta lado repetido ESQ/DIR', ret: true, c: P.success },
+            { from: 0, to: 1, label: 'Clica "Salvar Comentário (Backup)" antes de regravar', c: P.teal },
+            { from: 1, to: 4, label: 'Persiste backupSnapshot (recuperável em 1 clique)', c: P.teal },
+            { from: 0, to: 3, label: 'Grava Pergunta/Comentário/Conectivo (16kbps) ou dita pt-BR', c: P.purple },
+            { from: 0, to: 1, label: 'Inicia "Áudio Completo" (Ordem 1..N)', c: P.primary },
+            { from: 1, to: 3, label: 'Reproduz áudio gravado ou fallback TTS pt-BR sequencialmente', c: P.purple },
+          ],
+          'A/V integrado: comentários com Imagem Relacionada aparecem no deck "Imagens a Exibir" com alerta vermelho "👈👈👈 EXIBIR esta imagem".'
+        )
+      };
+    }
+
     return {
-      title: 'UML Sequência C — Exportação e Mesclagem Multi-Dispositivo (Mobile ↔ PC)',
+      title: 'UML Sequência C — Exportação e Mesclagem Multi-Dispositivo (Todos os 3 Apps)',
       subtitle: 'Juntar itens de vários aparelhos com unificação de evento e resolução de colisões',
       legend: '<span>Zero perda de fotos • Preserva etiquetaOrigem no rastreio</span>',
       defaultNode: 'cls-merge',
@@ -1279,6 +1468,7 @@
     applyChromeTheme();
     const map = {
       mer: renderMER,
+      merSuite: renderMERSuite,
       states: renderStates,
       usecases: renderUseCases,
       classes: renderClasses,

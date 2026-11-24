@@ -197,6 +197,22 @@ export const SyncHubView: React.FC = () => {
             </div>
           </div>
 
+          {(mergePreview.novasPartesPrograma +
+            mergePreview.partesAtualizadas +
+            mergePreview.novosComentariosSentinela +
+            mergePreview.comentariosAtualizados +
+            mergePreview.novosVoluntarios +
+            mergePreview.novosGuiasAV >
+            0) && (
+            <div className="rounded-xl border border-sky-200 bg-white p-3 text-xs text-slate-700">
+              <strong className="text-[#1e3a5f]">Apps Embutidos no Pacote:</strong>{' '}
+              Programa (+{mergePreview.novasPartesPrograma} / {mergePreview.partesAtualizadas} atu.) • Guia A/V (+
+              {mergePreview.novosGuiasAV}) • Demos (+{mergePreview.novasParticipacoes}) • A Sentinela (+
+              {mergePreview.novosComentariosSentinela} / {mergePreview.comentariosAtualizados} atu.) • Equipe (+
+              {mergePreview.novosVoluntarios}) • Mensagens (+{mergePreview.novasConversas}).
+            </div>
+          )}
+
           {/* Resolução de Colisões de Etiqueta */}
           {mergePreview.colisoesEtiqueta.length > 0 && (
             <div className="space-y-2 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs">

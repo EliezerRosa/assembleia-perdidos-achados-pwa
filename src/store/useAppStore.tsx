@@ -2,6 +2,12 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { DEFAULT_ITEM_TYPES } from '../constants/catalog';
 import { importFromSpreadsheetBuffer } from '../services/excelService';
 import { executeMerge } from '../services/mergeService';
+import { computePresidenciaKpis } from '../services/presidenciaService';
+import {
+  createSentinelaBackup,
+  reorderSentinelaComentario,
+  restoreSentinelaFromBackup,
+} from '../services/sentinelaService';
 import {
   createDemoSeedData,
   createEmptyDatabase,
@@ -23,20 +29,31 @@ import {
 import { speakPtBr } from '../services/voiceService';
 import type {
   AppDatabase,
+  AppSuiteMode,
   CategoriaItem,
+  ComunicacaoLog,
   ConfiguracaoDispositivo,
+  ConversaMensagem,
   DestinoSA,
+  DocumentoReferencia,
   EstrategiaColisaoEtiqueta,
   EstrategiaConflitoId,
   Evento,
+  GuiaAudioVideo,
   Item,
   ItemProcurado,
+  LembreteAgenda,
   NavTab,
+  ParticipacaoPrograma,
+  ProgramaParte,
   RelatorioFinal,
+  SentinelaComentario,
+  SentinelaEstudo,
   StatusItem,
   SyncBundle,
   SyncLogEntry,
   ValorItem,
+  Voluntario,
 } from '../types/domain';
 
 export interface ToastMessage {
@@ -62,16 +79,26 @@ export interface NewItemInput {
   donoNomeTels: string;
   congregacao: string;
   endereco: string;
-  // Entrega imediata opcional (igual ao Glide quando alguém já retira no ato)
   entregarAgora?: boolean;
   quemPegou?: string;
   fotoEntrega?: string;
+}
+
+export function getSuiteForTab(tab: NavTab): AppSuiteMode | null {
+  if (tab === 'evento' || tab === 'itens' || tab === 'procurados' || tab === 'destinar' || tab === 'relatorio') {
+    return 'achados';
+  }
+  if (tab.startsWith('presidencia_')) return 'presidencia';
+  if (tab.startsWith('sentinela_')) return 'sentinela';
+  return null;
 }
 
 interface AppContextValue {
   db: AppDatabase;
   activeTab: NavTab;
   setActiveTab: (tab: NavTab) => void;
+  activeSuite: AppSuiteMode;
+  switchSuite: (suite: AppSuiteMode) => void;
   activeEvento: Evento | null;
   allItemTypes: string[];
   storageUsage: ReturnType<typeof getStorageUsage>;
@@ -79,7 +106,7 @@ interface AppContextValue {
   notify: (text: string, kind?: ToastMessage['kind'], speak?: boolean) => void;
   dismissToast: (id: string) => void;
 
-  // Global search / filter state (controllable by UI & Voice!)
+  // Global search / filter state (Achados & Voz)
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   statusFilter: StatusItem | 'TODOS' | 'RETIDOS';
@@ -89,7 +116,13 @@ interface AppContextValue {
   showAllEventsInList: boolean;
   setShowAllEventsInList: (v: boolean) => void;
 
-  // Global modal triggers (controllable by UI & Voice!)
+  // Cross-view filters for Presidência
+  programaQuickFilter: 'todos' | 'oradores' | 'ja_compareceram' | 'faltam_dia1' | 'ensaios_pendentes' | 'serie';
+  setProgramaQuickFilter: (
+    f: 'todos' | 'oradores' | 'ja_compareceram' | 'faltam_dia1' | 'ensaios_pendentes' | 'serie',
+  ) => void;
+
+  // Global modal triggers
   newItemModal: { open: boolean; presetCategoria?: CategoriaItem; presetValor?: ValorItem; voiceDraft?: Partial<Item> };
   openNewItemModal: (opts?: { presetCategoria?: CategoriaItem; presetValor?: ValorItem; voiceDraft?: Partial<Item> }) => void;
   closeNewItemModal: () => void;
@@ -97,7 +130,7 @@ interface AppContextValue {
   policiesOpen: boolean;
   setPoliciesOpen: (v: boolean) => void;
 
-  // Mutations
+  // Eventos & Achados
   setActiveEvento: (eventoId: string) => void;
   createEvento: (input: Omit<Evento, 'id' | 'proximaEtiqueta' | 'createdAt' | 'updatedAt' | 'deviceId'>) => Evento;
   updateEvento: (evento: Evento) => void;
@@ -126,11 +159,67 @@ interface AppContextValue {
   createProcurado: (input: Omit<ItemProcurado, 'id' | 'createdAt' | 'updatedAt' | 'deviceId' | 'deviceName'>) => ItemProcurado;
   updateProcurado: (p: ItemProcurado) => void;
   deleteProcurado: (id: string) => void;
-
   saveRelatorio: (rel: RelatorioFinal) => void;
-  updateConfig: (patch: Partial<ConfiguracaoDispositivo>) => void;
 
-  // Sync / Excel / Demo / Reset
+  // Voluntários & Conversas (Compartilhados)
+  createVoluntario: (input: Omit<Voluntario, 'id' | 'createdAt' | 'updatedAt'>) => Voluntario;
+  updateVoluntario: (v: Voluntario) => void;
+  deleteVoluntario: (id: string) => void;
+  addConversaMensagem: (input: Omit<ConversaMensagem, 'id' | 'timestamp'>) => ConversaMensagem;
+
+  // Presidência do Congresso
+  createProgramaParte: (
+    input: Omit<
+      ProgramaParte,
+      | 'id'
+      | 'modoCronometro'
+      | 'inicioRealIso'
+      | 'fimRealIso'
+      | 'duracaoRealSegundos'
+      | 'ensaioInicioIso'
+      | 'ensaioDuracaoSegundos'
+      | 'mensagensLog'
+      | 'deviceId'
+      | 'createdAt'
+      | 'updatedAt'
+    >,
+  ) => ProgramaParte;
+  updateProgramaParte: (parte: ProgramaParte) => void;
+  deleteProgramaParte: (id: string) => void;
+  startProgramaParteLive: (id: string) => void;
+  startProgramaParteRehearsal: (id: string) => void;
+  finishProgramaParte: (id: string) => void;
+  restoreProgramaParte: (id: string) => void;
+  logProgramaComunicacao: (parteId: string, canal: ComunicacaoLog['canal'], resumo: string) => void;
+
+  createParticipacao: (input: Omit<ParticipacaoPrograma, 'id' | 'createdAt' | 'updatedAt'>) => ParticipacaoPrograma;
+  updateParticipacao: (p: ParticipacaoPrograma) => void;
+  deleteParticipacao: (id: string) => void;
+
+  createGuiaAV: (input: Omit<GuiaAudioVideo, 'id' | 'createdAt' | 'updatedAt'>) => GuiaAudioVideo;
+  updateGuiaAV: (g: GuiaAudioVideo) => void;
+  deleteGuiaAV: (id: string) => void;
+
+  createLembrete: (input: Omit<LembreteAgenda, 'id' | 'createdAt' | 'updatedAt'>) => LembreteAgenda;
+  updateLembrete: (l: LembreteAgenda) => void;
+  toggleLembreteConcluido: (id: string) => void;
+  deleteLembrete: (id: string) => void;
+
+  createReferencia: (input: Omit<DocumentoReferencia, 'id' | 'createdAt' | 'updatedAt'>) => DocumentoReferencia;
+  updateReferencia: (r: DocumentoReferencia) => void;
+  deleteReferencia: (id: string) => void;
+
+  // Resumo de A Sentinela
+  saveSentinelaEstudo: (estudo: Omit<SentinelaEstudo, 'id' | 'createdAt' | 'updatedAt'> & { id?: string }) => SentinelaEstudo;
+  createSentinelaComentario: (input: Omit<SentinelaComentario, 'id' | 'createdAt' | 'updatedAt'>) => SentinelaComentario;
+  updateSentinelaComentario: (c: SentinelaComentario, silent?: boolean) => void;
+  deleteSentinelaComentario: (id: string) => void;
+  moveSentinelaComentario: (estudoId: string, comentarioId: string, direction: 'up' | 'down') => void;
+  backupSentinelaComentario: (comentarioId: string) => void;
+  restoreSentinelaComentario: (comentarioId: string) => void;
+
+  // Config / Sync / Excel / Demo / Reset
+  updateConfig: (patch: Partial<ConfiguracaoDispositivo>) => void;
   applySyncMerge: (
     bundle: SyncBundle,
     opts: { estrategiaColisaoEtiqueta: EstrategiaColisaoEtiqueta; estrategiaConflitoId: EstrategiaConflitoId },
@@ -148,6 +237,8 @@ interface AppContextValue {
   // Derived metrics
   retidosCount: number;
   procuradosAbertosCount: number;
+  faltamDia1Count: number;
+  sentinelaPendentesCount: number;
   getNextTagForEvent: (eventoId: string) => { numero: number; codigo: string };
   getSuggestedFormPage: (eventoId: string) => number;
 }
@@ -156,7 +247,8 @@ const AppContext = createContext<AppContextValue | null>(null);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [db, setDb] = useState<AppDatabase>(() => loadDatabase());
-  const [activeTab, setActiveTab] = useState<NavTab>(() => (loadDatabase().activeEventoId ? 'itens' : 'evento'));
+  const [activeTab, setActiveTabState] = useState<NavTab>(() => (loadDatabase().activeEventoId ? 'itens' : 'evento'));
+  const [activeSuite, setActiveSuite] = useState<AppSuiteMode>('achados');
   const [storageUsage, setStorageUsage] = useState(() => getStorageUsage());
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
 
@@ -164,6 +256,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [statusFilter, setStatusFilter] = useState<StatusItem | 'TODOS' | 'RETIDOS'>('TODOS');
   const [categoriaFilter, setCategoriaFilter] = useState<CategoriaItem | 'TODAS'>('TODAS');
   const [showAllEventsInList, setShowAllEventsInList] = useState(false);
+  const [programaQuickFilter, setProgramaQuickFilter] = useState<
+    'todos' | 'oradores' | 'ja_compareceram' | 'faltam_dia1' | 'ensaios_pendentes' | 'serie'
+  >('todos');
 
   const [newItemModal, setNewItemModal] = useState<{
     open: boolean;
@@ -172,6 +267,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     voiceDraft?: Partial<Item>;
   }>({ open: false });
   const [policiesOpen, setPoliciesOpen] = useState(false);
+
+  const setActiveTab = useCallback((tab: NavTab) => {
+    setActiveTabState(tab);
+    const derived = getSuiteForTab(tab);
+    if (derived) setActiveSuite(derived);
+  }, []);
+
+  const switchSuite = useCallback((suite: AppSuiteMode) => {
+    setActiveSuite(suite);
+    if (suite === 'achados') setActiveTabState('itens');
+    else if (suite === 'presidencia') setActiveTabState('presidencia_foco');
+    else setActiveTabState('sentinela_estudo');
+  }, []);
 
   const notify = useCallback(
     (text: string, kind: ToastMessage['kind'] = 'info', speak = false) => {
@@ -191,7 +299,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // Persiste no localStorage sempre que o estado mudar
   useEffect(() => {
     const res = saveDatabase(db);
     if (!res.ok && res.error) {
@@ -200,7 +307,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setStorageUsage(getStorageUsage());
   }, [db, notify]);
 
-  // Aplica tema e tamanho de fonte acessíveis no HTML
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove('theme-light', 'theme-dark', 'theme-high-contrast');
@@ -229,6 +335,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [db.procurados],
   );
 
+  const faltamDia1Count = useMemo(() => {
+    const evPartes = activeEvento ? db.programaPartes.filter((p) => p.eventoId === activeEvento.id) : db.programaPartes;
+    return computePresidenciaKpis(evPartes).faltamDia1;
+  }, [db.programaPartes, activeEvento]);
+
+  const sentinelaPendentesCount = useMemo(() => {
+    const evCom = activeEvento
+      ? db.sentinelaComentarios.filter((c) => c.eventoId === activeEvento.id)
+      : db.sentinelaComentarios;
+    return evCom.filter((c) => !c.presenteDia1 || !c.ensaioPalcoFeito).length;
+  }, [db.sentinelaComentarios, activeEvento]);
+
   const getNextTagForEvent = useCallback(
     (eventoId: string) => {
       const ev = db.eventos.find((e) => e.id === eventoId);
@@ -244,10 +362,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [db.eventos, db.itens, db.config.etiquetaInicial, db.config.prefixoEtiqueta],
   );
 
-  /**
-   * Espelha a lógica do Glide + Anexo 1 (Manual Pág. 16/19: linhas 1..15 = 15 itens por folha):
-   * cada folha física comporta 15 itens antes de avançar automaticamente para a próxima página.
-   */
   const getSuggestedFormPage = useCallback(
     (eventoId: string) => {
       const evItems = db.itens.filter((i) => i.eventoId === eventoId);
@@ -276,12 +390,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       setNewItemModal({ open: true, ...opts });
     },
-    [activeEvento, notify],
+    [activeEvento, notify, setActiveTab],
   );
 
-  const closeNewItemModal = useCallback(() => {
-    setNewItemModal({ open: false });
-  }, []);
+  const closeNewItemModal = useCallback(() => setNewItemModal({ open: false }), []);
 
   const updateVoiceDraft = useCallback((fields: Partial<Item>) => {
     setNewItemModal((prev) => ({
@@ -340,7 +452,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }));
       notify(
         nextStatus === 'ativo'
-          ? `Evento ${ev.codigo} ABERTO — permite visualizar, adicionar e atualizar itens.`
+          ? `Evento ${ev.codigo} ABERTO — permite visualizar, adicionar e atualizar registros.`
           : `Evento ${ev.codigo} FECHADO — modo somente visualização ativado.`,
         'info',
         true,
@@ -359,10 +471,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           itens: prev.itens.filter((i) => i.eventoId !== eventoId),
           procurados: prev.procurados.filter((p) => p.eventoId !== eventoId),
           relatorios: prev.relatorios.filter((r) => r.eventoId !== eventoId),
+          voluntarios: prev.voluntarios.filter((v) => v.eventoId !== eventoId),
+          programaPartes: prev.programaPartes.filter((p) => p.eventoId !== eventoId),
+          participacoes: prev.participacoes.filter((p) => p.eventoId !== eventoId),
+          guiaAV: prev.guiaAV.filter((g) => g.eventoId !== eventoId),
+          lembretes: prev.lembretes.filter((l) => l.eventoId !== eventoId),
+          referencias: prev.referencias.filter((r) => r.eventoId !== eventoId),
+          sentinelaEstudos: prev.sentinelaEstudos.filter((s) => s.eventoId !== eventoId),
+          sentinelaComentarios: prev.sentinelaComentarios.filter((c) => c.eventoId !== eventoId),
+          conversas: prev.conversas.filter((m) => m.eventoId !== eventoId),
           activeEventoId: prev.activeEventoId === eventoId ? (remainingEvents[0]?.id ?? null) : prev.activeEventoId,
         };
       });
-      notify('Evento e seus itens locais foram removidos.', 'info');
+      notify('Evento e todos os módulos vinculados foram removidos localmente.', 'info');
     },
     [notify],
   );
@@ -651,6 +772,440 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     [notify],
   );
 
+  /* --- VOLUNTÁRIOS & CONVERSAS --- */
+  const createVoluntario: AppContextValue['createVoluntario'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const novo: Voluntario = { ...input, id: generateId('vol'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, voluntarios: [novo, ...prev.voluntarios] }));
+      notify(`Voluntário "${novo.nome}" cadastrado!`, 'success');
+      return novo;
+    },
+    [notify],
+  );
+
+  const updateVoluntario = useCallback(
+    (v: Voluntario) => {
+      setDb((prev) => ({
+        ...prev,
+        voluntarios: prev.voluntarios.map((x) => (x.id === v.id ? { ...v, updatedAt: new Date().toISOString() } : x)),
+      }));
+      notify(`Cadastro de "${v.nome}" atualizado.`, 'success');
+    },
+    [notify],
+  );
+
+  const deleteVoluntario = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, voluntarios: prev.voluntarios.filter((x) => x.id !== id) }));
+      notify('Voluntário removido.', 'info');
+    },
+    [notify],
+  );
+
+  const addConversaMensagem: AppContextValue['addConversaMensagem'] = useCallback((input) => {
+    const msg: ConversaMensagem = {
+      ...input,
+      id: generateId('msg'),
+      timestamp: new Date().toISOString(),
+    };
+    setDb((prev) => ({ ...prev, conversas: [...prev.conversas, msg] }));
+    return msg;
+  }, []);
+
+  /* --- PRESIDÊNCIA DO CONGRESSO --- */
+  const createProgramaParte: AppContextValue['createProgramaParte'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const nova: ProgramaParte = {
+        ...input,
+        id: generateId('prg'),
+        modoCronometro: 'parado',
+        inicioRealIso: '',
+        fimRealIso: '',
+        duracaoRealSegundos: 0,
+        ensaioInicioIso: '',
+        ensaioDuracaoSegundos: 0,
+        mensagensLog: [],
+        deviceId: db.config.deviceId,
+        createdAt: now,
+        updatedAt: now,
+      };
+      setDb((prev) => ({ ...prev, programaPartes: [...prev.programaPartes, nova] }));
+      notify(`Parte "${nova.tema}" adicionada ao programa.`, 'success');
+      return nova;
+    },
+    [db.config.deviceId, notify],
+  );
+
+  const updateProgramaParte = useCallback((parte: ProgramaParte) => {
+    setDb((prev) => ({
+      ...prev,
+      programaPartes: prev.programaPartes.map((p) =>
+        p.id === parte.id ? { ...parte, updatedAt: new Date().toISOString() } : p,
+      ),
+    }));
+  }, []);
+
+  const deleteProgramaParte = useCallback(
+    (id: string) => {
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.filter((p) => p.id !== id),
+        participacoes: prev.participacoes.filter((x) => x.programaParteId !== id),
+        guiaAV: prev.guiaAV.filter((x) => x.programaParteId !== id),
+      }));
+      notify('Parte removida do programa.', 'info');
+    },
+    [notify],
+  );
+
+  const startProgramaParteLive = useCallback(
+    (id: string) => {
+      const now = new Date().toISOString();
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                modoCronometro: 'ao_vivo',
+                inicioRealIso: now,
+                fimRealIso: '',
+                duracaoRealSegundos: 0,
+                updatedAt: now,
+              }
+            : p,
+        ),
+      }));
+      notify('Cronômetro AO VIVO iniciado!', 'success', true);
+    },
+    [notify],
+  );
+
+  const startProgramaParteRehearsal = useCallback(
+    (id: string) => {
+      const now = new Date().toISOString();
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                modoCronometro: 'ensaio_pessoal',
+                ensaioInicioIso: now,
+                updatedAt: now,
+              }
+            : p,
+        ),
+      }));
+      notify('Ensaio Pessoal iniciado (não encerra a parte oficial).', 'info', true);
+    },
+    [notify],
+  );
+
+  const finishProgramaParte = useCallback(
+    (id: string) => {
+      const now = new Date().toISOString();
+      const nowMs = new Date(now).getTime();
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.map((p) => {
+          if (p.id !== id) return p;
+          if (p.modoCronometro === 'ensaio_pessoal') {
+            const elapsed = p.ensaioInicioIso
+              ? Math.max(0, Math.floor((nowMs - new Date(p.ensaioInicioIso).getTime()) / 1000))
+              : 0;
+            return {
+              ...p,
+              modoCronometro: 'parado',
+              ensaioDuracaoSegundos: elapsed,
+              ensaioInicioIso: '',
+              updatedAt: now,
+            };
+          }
+          const elapsed = p.inicioRealIso
+            ? Math.max(0, Math.floor((nowMs - new Date(p.inicioRealIso).getTime()) / 1000))
+            : p.duracaoRealSegundos;
+          return {
+            ...p,
+            modoCronometro: 'concluido',
+            fimRealIso: now,
+            duracaoRealSegundos: elapsed,
+            updatedAt: now,
+          };
+        }),
+      }));
+      notify('Cronômetro encerrado e tempo registrado!', 'success', true);
+    },
+    [notify],
+  );
+
+  const restoreProgramaParte = useCallback(
+    (id: string) => {
+      const now = new Date().toISOString();
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.map((p) =>
+          p.id === id
+            ? {
+                ...p,
+                modoCronometro: 'parado',
+                inicioRealIso: '',
+                fimRealIso: '',
+                duracaoRealSegundos: 0,
+                ensaioInicioIso: '',
+                ensaioDuracaoSegundos: 0,
+                updatedAt: now,
+              }
+            : p,
+        ),
+      }));
+      notify('Parte restaurada para o estado inicial.', 'info');
+    },
+    [notify],
+  );
+
+  const logProgramaComunicacao = useCallback(
+    (parteId: string, canal: ComunicacaoLog['canal'], resumo: string) => {
+      const now = new Date().toISOString();
+      const entry: ComunicacaoLog = {
+        id: generateId('com'),
+        timestamp: now,
+        canal,
+        resumo,
+        operador: db.config.operadorPadrao,
+      };
+      setDb((prev) => ({
+        ...prev,
+        programaPartes: prev.programaPartes.map((p) =>
+          p.id === parteId ? { ...p, mensagensLog: [entry, ...p.mensagensLog], updatedAt: now } : p,
+        ),
+      }));
+    },
+    [db.config.operadorPadrao],
+  );
+
+  const createParticipacao: AppContextValue['createParticipacao'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const nova: ParticipacaoPrograma = { ...input, id: generateId('prt'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, participacoes: [nova, ...prev.participacoes] }));
+      notify(`Participação (${nova.tipoParticipacao}) de ${nova.participanteNome} salva!`, 'success');
+      return nova;
+    },
+    [notify],
+  );
+
+  const updateParticipacao = useCallback((p: ParticipacaoPrograma) => {
+    setDb((prev) => ({
+      ...prev,
+      participacoes: prev.participacoes.map((x) => (x.id === p.id ? { ...p, updatedAt: new Date().toISOString() } : x)),
+    }));
+  }, []);
+
+  const deleteParticipacao = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, participacoes: prev.participacoes.filter((x) => x.id !== id) }));
+      notify('Participação removida.', 'info');
+    },
+    [notify],
+  );
+
+  const createGuiaAV: AppContextValue['createGuiaAV'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const novo: GuiaAudioVideo = { ...input, id: generateId('gav'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, guiaAV: [...prev.guiaAV, novo] }));
+      notify('Dica de Áudio e Vídeo adicionada!', 'success');
+      return novo;
+    },
+    [notify],
+  );
+
+  const updateGuiaAV = useCallback((g: GuiaAudioVideo) => {
+    setDb((prev) => ({
+      ...prev,
+      guiaAV: prev.guiaAV.map((x) => (x.id === g.id ? { ...g, updatedAt: new Date().toISOString() } : x)),
+    }));
+  }, []);
+
+  const deleteGuiaAV = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, guiaAV: prev.guiaAV.filter((x) => x.id !== id) }));
+      notify('Item removido do Guia A/V.', 'info');
+    },
+    [notify],
+  );
+
+  const createLembrete: AppContextValue['createLembrete'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const novo: LembreteAgenda = { ...input, id: generateId('lem'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, lembretes: [novo, ...prev.lembretes] }));
+      notify(`${novo.ehAgenda ? 'Evento da Agenda' : 'Lembrete'} salvo!`, 'success');
+      return novo;
+    },
+    [notify],
+  );
+
+  const updateLembrete = useCallback((l: LembreteAgenda) => {
+    setDb((prev) => ({
+      ...prev,
+      lembretes: prev.lembretes.map((x) => (x.id === l.id ? { ...l, updatedAt: new Date().toISOString() } : x)),
+    }));
+  }, []);
+
+  const toggleLembreteConcluido = useCallback(
+    (id: string) => {
+      const op = db.config.operadorPadrao || 'Operador';
+      setDb((prev) => ({
+        ...prev,
+        lembretes: prev.lembretes.map((l) => {
+          if (l.id !== id) return l;
+          const exists = l.concluidoPorOperadores.includes(op);
+          return {
+            ...l,
+            concluidoPorOperadores: exists
+              ? l.concluidoPorOperadores.filter((x) => x !== op)
+              : [...l.concluidoPorOperadores, op],
+            updatedAt: new Date().toISOString(),
+          };
+        }),
+      }));
+    },
+    [db.config.operadorPadrao],
+  );
+
+  const deleteLembrete = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, lembretes: prev.lembretes.filter((x) => x.id !== id) }));
+      notify('Registro removido.', 'info');
+    },
+    [notify],
+  );
+
+  const createReferencia: AppContextValue['createReferencia'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const nova: DocumentoReferencia = { ...input, id: generateId('ref'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, referencias: [nova, ...prev.referencias] }));
+      notify(`Documento ${nova.codigo} salvo!`, 'success');
+      return nova;
+    },
+    [notify],
+  );
+
+  const updateReferencia = useCallback((r: DocumentoReferencia) => {
+    setDb((prev) => ({
+      ...prev,
+      referencias: prev.referencias.map((x) => (x.id === r.id ? { ...r, updatedAt: new Date().toISOString() } : x)),
+    }));
+  }, []);
+
+  const deleteReferencia = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, referencias: prev.referencias.filter((x) => x.id !== id) }));
+      notify('Documento removido.', 'info');
+    },
+    [notify],
+  );
+
+  /* --- RESUMO DE A SENTINELA --- */
+  const saveSentinelaEstudo: AppContextValue['saveSentinelaEstudo'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const id = input.id ?? generateId('snt');
+      const saved: SentinelaEstudo = {
+        ...input,
+        id,
+        createdAt: now,
+        updatedAt: now,
+      };
+      setDb((prev) => {
+        const exists = prev.sentinelaEstudos.some((s) => s.id === id);
+        return {
+          ...prev,
+          sentinelaEstudos: exists
+            ? prev.sentinelaEstudos.map((s) => (s.id === id ? { ...saved, createdAt: s.createdAt } : s))
+            : [saved, ...prev.sentinelaEstudos],
+        };
+      });
+      notify('Cabeçalho do Resumo de A Sentinela salvo!', 'success');
+      return saved;
+    },
+    [notify],
+  );
+
+  const createSentinelaComentario: AppContextValue['createSentinelaComentario'] = useCallback(
+    (input) => {
+      const now = new Date().toISOString();
+      const novo: SentinelaComentario = { ...input, id: generateId('scm'), createdAt: now, updatedAt: now };
+      setDb((prev) => ({ ...prev, sentinelaComentarios: [...prev.sentinelaComentarios, novo] }));
+      notify(`Comentário #${novo.ordenacao} adicionado à ordem de entrada!`, 'success');
+      return novo;
+    },
+    [notify],
+  );
+
+  const updateSentinelaComentario = useCallback(
+    (c: SentinelaComentario, silent = false) => {
+      setDb((prev) => ({
+        ...prev,
+        sentinelaComentarios: prev.sentinelaComentarios.map((x) =>
+          x.id === c.id ? { ...c, updatedAt: new Date().toISOString() } : x,
+        ),
+      }));
+      if (!silent) notify(`Comentário #${c.ordenacao} atualizado.`, 'success');
+    },
+    [notify],
+  );
+
+  const deleteSentinelaComentario = useCallback(
+    (id: string) => {
+      setDb((prev) => ({ ...prev, sentinelaComentarios: prev.sentinelaComentarios.filter((x) => x.id !== id) }));
+      notify('Comentário removido da ordem.', 'info');
+    },
+    [notify],
+  );
+
+  const moveSentinelaComentario = useCallback((estudoId: string, comentarioId: string, direction: 'up' | 'down') => {
+    setDb((prev) => {
+      const ofStudy = prev.sentinelaComentarios.filter((c) => c.estudoId === estudoId);
+      const others = prev.sentinelaComentarios.filter((c) => c.estudoId !== estudoId);
+      const reordered = reorderSentinelaComentario(ofStudy, comentarioId, direction);
+      return { ...prev, sentinelaComentarios: [...others, ...reordered] };
+    });
+  }, []);
+
+  const backupSentinelaComentario = useCallback(
+    (comentarioId: string) => {
+      setDb((prev) => ({
+        ...prev,
+        sentinelaComentarios: prev.sentinelaComentarios.map((c) =>
+          c.id === comentarioId
+            ? { ...c, backupSnapshot: createSentinelaBackup(c), updatedAt: new Date().toISOString() }
+            : c,
+        ),
+      }));
+      notify('Cópia de segurança do comentário salva (pronta para Recuperar)!', 'success');
+    },
+    [notify],
+  );
+
+  const restoreSentinelaComentario = useCallback(
+    (comentarioId: string) => {
+      setDb((prev) => ({
+        ...prev,
+        sentinelaComentarios: prev.sentinelaComentarios.map((c) =>
+          c.id === comentarioId ? restoreSentinelaFromBackup(c) : c,
+        ),
+      }));
+      notify('Comentário restaurado a partir do backup salvo!', 'info');
+    },
+    [notify],
+  );
+
   const updateConfig = useCallback((patch: Partial<ConfiguracaoDispositivo>) => {
     setDb((prev) => ({
       ...prev,
@@ -713,9 +1268,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       eventos: [...seed.eventos, ...prev.eventos],
       itens: [...seed.itens, ...prev.itens],
       procurados: [...seed.procurados, ...prev.procurados],
+      voluntarios: [...seed.voluntarios, ...prev.voluntarios],
+      programaPartes: [...seed.programaPartes, ...prev.programaPartes],
+      participacoes: [...seed.participacoes, ...prev.participacoes],
+      guiaAV: [...seed.guiaAV, ...prev.guiaAV],
+      lembretes: [...seed.lembretes, ...prev.lembretes],
+      referencias: [...seed.referencias, ...prev.referencias],
+      sentinelaEstudos: [...seed.sentinelaEstudos, ...prev.sentinelaEstudos],
+      sentinelaComentarios: [...seed.sentinelaComentarios, ...prev.sentinelaComentarios],
+      conversas: [...seed.conversas, ...prev.conversas],
     }));
-    setActiveTab('itens');
-    notify('Dados de demonstração fictícios carregados com sucesso!', 'success', true);
+    notify('Demonstração completa (Achados + Presidência + Sentinela) carregada!', 'success', true);
   }, [db.config, notify]);
 
   const clearAllData = useCallback(() => {
@@ -724,12 +1287,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDb(fresh);
     setActiveTab('evento');
     notify('Base local limpa. Pronto para começar um novo evento ou importar dados.', 'info');
-  }, [db.config, notify]);
+  }, [db.config, notify, setActiveTab]);
 
   const value: AppContextValue = {
     db,
     activeTab,
     setActiveTab,
+    activeSuite,
+    switchSuite,
     activeEvento,
     allItemTypes,
     storageUsage,
@@ -744,6 +1309,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCategoriaFilter,
     showAllEventsInList,
     setShowAllEventsInList,
+    programaQuickFilter,
+    setProgramaQuickFilter,
     newItemModal,
     openNewItemModal,
     closeNewItemModal,
@@ -766,6 +1333,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     updateProcurado,
     deleteProcurado,
     saveRelatorio,
+    createVoluntario,
+    updateVoluntario,
+    deleteVoluntario,
+    addConversaMensagem,
+    createProgramaParte,
+    updateProgramaParte,
+    deleteProgramaParte,
+    startProgramaParteLive,
+    startProgramaParteRehearsal,
+    finishProgramaParte,
+    restoreProgramaParte,
+    logProgramaComunicacao,
+    createParticipacao,
+    updateParticipacao,
+    deleteParticipacao,
+    createGuiaAV,
+    updateGuiaAV,
+    deleteGuiaAV,
+    createLembrete,
+    updateLembrete,
+    toggleLembreteConcluido,
+    deleteLembrete,
+    createReferencia,
+    updateReferencia,
+    deleteReferencia,
+    saveSentinelaEstudo,
+    createSentinelaComentario,
+    updateSentinelaComentario,
+    deleteSentinelaComentario,
+    moveSentinelaComentario,
+    backupSentinelaComentario,
+    restoreSentinelaComentario,
     updateConfig,
     applySyncMerge,
     importSpreadsheet,
@@ -774,6 +1373,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     clearAllData,
     retidosCount,
     procuradosAbertosCount,
+    faltamDia1Count,
+    sentinelaPendentesCount,
     getNextTagForEvent,
     getSuggestedFormPage,
   };

@@ -1,38 +1,26 @@
-# Arquitetura e Decisões Técnicas
+# Arquitetura e Decisões Técnicas — Suíte Eventos PWA (v2)
 
 ## 1. Visão Geral
 
-O **Perdidos & Achados — Guarda-Volumes PWA** foi projetado para operar **100% offline-first** em **PCs** (Windows/macOS/Linux) e **Mobiles** (Android e iOS) durante Assembleias e Congressos, onde a conectividade de internet no Salão de Assembleias frequentemente oscila ou inexiste.
+A **Suíte Eventos PWA** evoluiu de um aplicativo dedicado a **Perdidos e Achados & Guarda-Volumes** para uma **suíte offline-first unificada com 3 Apps Embutidos**, clonando e modernizando todos os fluxos operacionais do aplicativo Glide `Eventos (New)` (`ANL4cdICJTsLdTONT7Hp`):
 
-## 2. Stack Escolhida
+1. **App 1 — Perdidos & Achados + Guarda-Volumes**: Foto → Etiqueta Gêmea → Foto, políticas §54–58, Itens Procurados, Deck Swipe Destinar SA (>=60d + reversão <7d), Excel 25 colunas, `PA.txt` Acrobat e impressão A4 (`ANEXO 1` 15 linhas/pág + `Relatório Final`).
+2. **App 2 — Presidência do Congresso**: Painel *Evento em Foco*, grade 3 dias × 2 turnos, Oradores + 3 Substitutos (com clonagem rápida e promoção em 1 toque), Check-in em 3 etapas, Ensaio no Palco, Cronômetro Dual-Mode (*Ao Vivo* vs *Ensaio Pessoal*) com alertas `-1 min` e `PASSOU DA HORA`, Participantes de Demonstrações/Entrevistas (`Programa Parte`), Guia de Áudio & Vídeo com `Dica Play` e toggle `Ativar Play`, Agenda, Lembretes filtrados por 7 perfis RBAC e Documentos de Referência.
+3. **App 3 — Resumo de A Sentinela**: Cabeçalho do estudo, Ordem de Entrada reordenável (`↑`/`↓`) com **motor cronológico em cascata em segundos** (30s padrão), coreografia de palco `ESQUERDA` / `DIREITA` / `TRIBUNA` com banner dourado `#FFD700` e alerta automático de lado consecutivo repetido, Galeria de Comentaristas, Matriz de Substituições, Deck **Imagens a Exibir** para A/V, Estúdio de Áudio offline (`MediaRecorder` 16 kbps + ditado `pt-BR` + Salvar/Recuperar snapshot), Player sequencial **`Áudio Completo`** com fallback TTS e mural `Conversar Com Todos`.
 
-| Camada | Tecnologia | Justificativa |
+## 2. Stack e Persistência (Migração v1 → v2)
+
+| Camada | Tecnologia | Decisão |
 | --- | --- | --- |
-| Build & Bundler | **Vite 6** + **TypeScript 5.8 (strict)** | Build rápido, code-splitting (`vendor`, `xlsx`, `mermaid`) e segurança de tipos |
-| UI & Responsividade | **React 19** + **Tailwind CSS v4** + **Lucide Icons** | Layout adaptativo (Sidebar no Desktop, Bottom Navigation ergonômica no Mobile), alvos de toque >= 44px e folha de impressão `@media print` A4 |
-| PWA | **vite-plugin-pwa (Workbox)** | Manifesto instalável, Service Worker com cache offline automático e banner de instalação nativo |
-| Persistência | **Browser `localStorage`** (`assembleia_pa_db_v1`) | Atende diretamente ao requisito de armazenamento local transparente, com medidor de uso em KB/MB/% e proteção contra `QuotaExceededError` |
-| Fotos | **HTML5 Canvas (`photoService.ts`)** | Redimensiona automaticamente fotos para <= 900px e comprime em JPEG (~35–55 KB/foto), com carimbo opcional da etiqueta e hora |
-| Planilhas | **SheetJS (`xlsx`)** | Importação direta de `Perdidos e Achados (Guarda-Volumes).xlsx` e `.csv`, e exportação retrocompatível com as 25 colunas |
-| Acessibilidade por Voz | **Web Speech API (`pt-BR`)** | Reconhecimento contínuo por comando + ditado por campo + preenchimento multi-campo por frase natural + retorno falado (`SpeechSynthesis`) + fallback por barra de comando (`Ctrl+K`) |
-| Documentação Viva | **Mermaid.js** (lazy-loaded) | Renderização interativa dos diagramas MER e UML dentro da própria aplicação + arquivos versionados em `docs/` |
-| Testes | **Vitest** | Testes unitários automatizados para ciclo de vida, mesclagem multi-dispositivo, voz e importação/exportação Excel |
+| Build & Tipos | **Vite 6** + **TypeScript 5.8 (strict)** | Code-splitting (`vendor`, `xlsx`, `mermaid`) e tipagem estrita |
+| UI & Ergonomia | **React 19** + **Tailwind CSS v4** + **Lucide** | Seletor de 3 Apps no topo, Sidebar no PC, Bottom Nav dinâmica de 5 abas por app no Mobile, Alto Contraste e `@media print` A4 |
+| Offline / PWA | **vite-plugin-pwa (Workbox)** | Pré-cache completo para funcionamento 100% sem internet no Salão |
+| Persistência | **`localStorage` (`assembleia_pa_db_v1`, schema v2)** | Migração automática e retrocompatível: bases v1 existentes abrem sem perder nenhum dado de Achados, inicializando os módulos de Presidência e Sentinela |
+| Áudio & Voz | **Web Speech API (`pt-BR`)** + **`MediaRecorder` (16 kbps)** | Substitui integrações pagas de IA do Glide com ditado, leitura TTS e gravação local leve |
+| Mesclagem | **`mergeService.ts` (`SyncBundle` v1/v2)** | Consolida todos os 3 apps entre vários celulares e PCs preservando retrocompatibilidade com pacotes v1 |
+| Testes | **Vitest** | Testes unitários cobrindo Achados, Presidência, Sentinela, Voz, Merge e Excel |
 
-## 3. Estratégia de Mesclagem Multi-Dispositivo (Requisito #9)
+## 3. Privacidade e LGPD
 
-Para permitir que múltiplos voluntários cadastrem itens simultaneamente em celulares e PCs independentes e depois consolidem tudo em um único equipamento:
-
-1. **Identidade Única Global**: Cada item possui `id` único, `deviceId`, `deviceName` e `updatedAt`.
-2. **Prevenção Opcional na Origem**: Na aba *Sincronizar*, cada equipamento pode configurar um prefixo (ex.: `A-`, `B-`) ou etiqueta inicial (ex.: `1`, `101`, `201`).
-3. **Unificação Automática de Evento**: Eventos criados separadamente com o mesmo `(codigo, data)` são mesclados em um único evento ao importar o pacote `.json`.
-4. **Detecção e Resolução de Colisões de Etiqueta**: Antes de gravar, o `MergePreview` exibe quantas etiquetas colidiram e permite escolher:
-   - **Renumerar automático (recomendado)**: atribui a próxima etiqueta livre do evento e preserva a etiqueta original em `etiquetaOrigem` e no rastreio.
-   - **Prefixo do equipamento**: diferencia visualmente (ex.: `CEL-01`).
-   - **Manter igual**: preserva ambos os códigos.
-5. **União de Rastreio e Fotos**: Quando o mesmo item (`id`) foi atualizado em dois equipamentos (ex.: foto da etiqueta no Celular A e entrega no PC B), o motor mantém a atualização mais recente, **preserva fotos de ambos os lados** e une cronologicamente todos os eventos de `rastreio[]`.
-
-## 4. Privacidade e LGPD
-
-- Nenhum dado pessoal real (nomes, telefones, endereços ou congregações da planilha operacional) é versionado no repositório Git.
-- O `.gitignore` bloqueia arquivos `*.xlsx`, `*.xls`, `*.csv` e `*.backup.json`.
-- O aplicativo oferece um conjunto de dados **100% fictício** para demonstração e um importador local para o usuário carregar sua própria planilha `Perdidos e Achados (Guarda-Volumes).xlsx` diretamente no navegador.
+- Repositório **público** (necessário para GitHub Pages gratuito): **zero PII / zero dados reais** versionados no Git.
+- O conjunto de demonstração (`createDemoSeedData`) contém exclusivamente dados sintéticos fictícios cobrindo os 3 apps embutidos.

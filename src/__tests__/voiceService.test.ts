@@ -21,6 +21,16 @@ describe('voiceService — Comandos de Voz e Preenchimento de Formulários (pt-B
       type: 'SEARCH',
       query: 'garrafa térmica',
     });
+    // Novos comandos dos Apps Embutidos (Presidência & Resumo de A Sentinela)
+    expect(parseVoiceCommand('Abrir presidência')).toEqual({ type: 'NAVIGATE', tab: 'presidencia_foco' });
+    expect(parseVoiceCommand('Abrir programa')).toEqual({ type: 'NAVIGATE', tab: 'presidencia_programa' });
+    expect(parseVoiceCommand('Abrir demonstrações')).toEqual({ type: 'NAVIGATE', tab: 'presidencia_demos' });
+    expect(parseVoiceCommand('Abrir guia áudio e vídeo')).toEqual({ type: 'NAVIGATE', tab: 'presidencia_av' });
+    expect(parseVoiceCommand('Abrir sentinela')).toEqual({ type: 'NAVIGATE', tab: 'sentinela_estudo' });
+    expect(parseVoiceCommand('Abrir palco')).toEqual({ type: 'NAVIGATE', tab: 'sentinela_palco' });
+    expect(parseVoiceCommand('Abrir imagens a exibir')).toEqual({ type: 'NAVIGATE', tab: 'sentinela_imagens' });
+    expect(parseVoiceCommand('Abrir áudio completo')).toEqual({ type: 'NAVIGATE', tab: 'sentinela_audio' });
+    expect(parseVoiceCommand('Abrir equipe')).toEqual({ type: 'NAVIGATE', tab: 'equipe' });
   });
 
   it('extrai múltiplos campos estruturados a partir de uma única frase falada', () => {

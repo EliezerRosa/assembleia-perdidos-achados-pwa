@@ -159,4 +159,87 @@ describe('mergeService — Sincronização e Mesclagem Multi-Dispositivo', () =>
     expect(consolidated.fotoEntrega).toBe('data:image/jpeg;base64,FOTO_ENTREGA_B'); // Preservada do lado B!
     expect(consolidated.rastreio.length).toBeGreaterThanOrEqual(3); // Recebido + Entregue + Mesclado
   });
+
+  it('mescla dados dos Apps Embutidos (Presidência do Congresso + Resumo de A Sentinela + Equipe) entre dispositivos', () => {
+    const dbA: AppDatabase = createEmptyDatabase();
+    dbA.eventos = [makeEvent('evt_local', 'CO-ES005', '2026-11-23')];
+    dbA.activeEventoId = 'evt_local';
+
+    const dbB: AppDatabase = createEmptyDatabase();
+    dbB.config.deviceName = 'Celular Presidência';
+    dbB.eventos = [makeEvent('evt_remoto', 'CO-ES005', '2026-11-23')];
+    dbB.programaPartes = [
+      {
+        id: 'prg_remote_1',
+        eventoId: 'evt_remoto',
+        dia: 'Sexta-feira',
+        dataHoraInicioProgramada: '2026-11-23T09:40',
+        tempoProgramadoMin: 25,
+        tipo: 'Discurso',
+        formato: 'Ao Vivo',
+        tema: 'Discurso do Presidente',
+        ehSerie: false,
+        linkEsboco: '',
+        oradorNome: 'Carlos Demo',
+        oradorCongregacao: 'Central',
+        oradorCircuito: 'ES-005',
+        oradorTelefone: '',
+        oradorEmailSecular: '',
+        oradorEmailJwpub: '',
+        oradorConfirmado: true,
+        substitutos: [],
+        checkInDia1: true,
+        checkIn30MinDia: false,
+        checkIn30MinPalco: false,
+        ensaioPalcoFeito: true,
+        ensaioPalcoHorario: '',
+        modoCronometro: 'parado',
+        inicioRealIso: '',
+        fimRealIso: '',
+        duracaoRealSegundos: 0,
+        ensaioInicioIso: '',
+        ensaioDuracaoSegundos: 0,
+        observacoes: '',
+        mensagensLog: [],
+        deviceId: 'dev_b',
+        createdAt: '2026-11-23T08:00:00.000Z',
+        updatedAt: '2026-11-23T09:00:00.000Z',
+      },
+    ];
+    dbB.sentinelaEstudos = [
+      {
+        id: 'snt_remote_1',
+        eventoId: 'evt_remoto',
+        tituloArtigo: 'Estudo Demo',
+        edicaoSemana: 'Sem 42',
+        textoBase: 'Salmo 31:24',
+        objetivo: 'Fortalecer fé',
+        canticoInicial: '118',
+        canticoFinal: '124',
+        linkArtigoJw: '',
+        dia: 'Domingo',
+        horaInicio: '10:30',
+        duracaoPrevistaMin: 30,
+        dirigenteNome: 'Roberto Demo',
+        dirigenteTelefone: '',
+        observacoesPalco: '',
+        createdAt: '2026-11-23T08:00:00.000Z',
+        updatedAt: '2026-11-23T09:00:00.000Z',
+      },
+    ];
+
+    const bundle = buildSyncBundle(dbB, 'all');
+    const preview = previewMerge(dbA, bundle);
+    expect(preview.novasPartesPrograma).toBe(1);
+    expect(preview.novosEstudosSentinela).toBe(1);
+
+    const merged = executeMerge(dbA, bundle, {
+      estrategiaColisaoEtiqueta: 'renumerar',
+      estrategiaConflitoId: 'mais_recente',
+    });
+    expect(merged.db.programaPartes).toHaveLength(1);
+    expect(merged.db.programaPartes[0].eventoId).toBe('evt_local');
+    expect(merged.db.sentinelaEstudos).toHaveLength(1);
+    expect(merged.db.sentinelaEstudos[0].eventoId).toBe('evt_local');
+  });
 });

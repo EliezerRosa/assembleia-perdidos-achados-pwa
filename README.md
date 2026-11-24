@@ -1,72 +1,57 @@
-# Perdidos & Achados — Guarda-Volumes (PWA)
+# Suíte Eventos PWA — Achados & Perdidos • Presidência do Congresso • Resumo de A Sentinela
 
 🌐 **Acesso Online (GitHub Pages / Instalável como PWA):** https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/
 
-Aplicativo **PWA (Progressive Web App)** offline-first desenvolvido para rodar em **PC (Windows/macOS/Linux)** e **Mobiles (Android/iOS)** no Departamento de **Perdidos e Achados & Guarda-Volumes** de Assembleias e Congressos.
-
-Baseado no fluxo operacional da planilha `Perdidos e Achados (Guarda-Volumes).xlsx`, do aplicativo Glide de referência, das orientações oficiais (§54–58) e do `Relatório Final - Após o Evento` (Salão de Assembleias — Guarapari/ES).
+Aplicativo **PWA (Progressive Web App)** **100% offline-first** desenvolvido para rodar em **PC (Windows/macOS/Linux)** e **Mobiles (Android/iOS)** em Assembleias e Congressos, reunindo os **3 Apps Embutidos** do ecossistema Glide `Eventos (New)` (`ANL4cdICJTsLdTONT7Hp`) em uma única suíte rápida, acessível por voz (`pt-BR`) e sem dependência de internet ou assinatura paga.
 
 ---
 
-## Principais Recursos
+## Os 3 Apps Embutidos na Suíte
 
-1. **PWA Instalável & 100% Offline-First (`PC + Mobile`)**
-   - Manifesto Web App, ícones PNG 192/512 + Apple Touch Icon e Service Worker Workbox.
-   - Persistência em `localStorage` (`assembleia_pa_db_v1`) com medidor de espaço e compressão automática de fotos via Canvas (~40 KB/foto).
-2. **Fluxo Foto → Etiqueta → Foto (+ Foto de Entrega)**
-   - **Foto 1**: Foto do item com a etiqueta física `#N` colada (com carimbo opcional de etiqueta + hora).
-   - **Etiqueta Gêmea**: Numeração sequencial automática por evento + confirmação de aplicação no objeto e na `Form Página` do formulário em papel + impressão de par de etiquetas gêmeas.
-   - **Foto 2**: Foto da etiqueta no formulário físico / comprovante.
-   - **Foto 3 (opcional)**: Foto comprobatória na entrega ao dono.
-3. **Ciclo de Vida Completo & Rastreio Auditável**
-   - Máquina de estados: `Ainda Guardado` → `Em Conferência` → `Já Entregue` / `Entregue ao Depto. Contas` / `DESPACHADO (DOAR | VENDER | DESCARTAR)` + `Reabertura` auditada.
-   - Linha do tempo cronológica (`rastreio[]`) registrando data/hora, operador, equipamento e localização de custódia em cada etapa.
-   - Alertas automáticos das **Orientações Oficiais (§54–58)**:
-     - **§55**: Artigos de valor (`Alto`/`Precioso`), carteiras, bolsas e celulares marcados como **Não Expor** (cofre/área restrita).
-     - **§56**: Fluxo prioritário de **Criança / Pessoa Perdida** (alerta explícito: *não anunciar no microfone; avisar Indicadores, SA e SC*).
-     - **§57**: Dinheiro direcionado ao **Departamento de Contas**; itens retidos há `>= 60 dias` entram automaticamente no deck **Destinar (SA)**.
-     - **§58**: Validação de dados do dono (Nome/Tel., Congregação e Endereço) para itens de **Guarda-Volumes** (exceto roupas).
-4. **Acessibilidade por Voz (`pt-BR`) & UIX Ergonômica**
-   - Assistente flutuante de voz (`Alt+V`) e barra de comando rápida (`Ctrl+K`) para abrir telas, buscar e filtrar.
-   - Botão de microfone individual em cada campo de formulário + **Ditado Inteligente Multi-Campo** (ex.: *"Celular Samsung capa verde, valor alto, categoria perdido, quem trouxe Maria no banheiro feminino"*).
-   - Retorno falado (TTS), modo **Alto Contraste** e controle de tamanho da fonte (`Normal` / `Grande` / `Extra`).
-5. **Itens Procurados com Correspondência Inteligente**
-   - Registro de solicitações com foto de referência e pontuação automática de similaridade contra todos os itens cadastrados (incluindo os já entregues para rastreio).
-6. **Relatório Final Oficial & ANEXO 1 (Relação dos Itens Encontrados — 15 linhas/pág. A4)**
-   - **ANEXO 1 (Manual de Funcionamento Pág. 16/19):** substitui o antigo PDF com JavaScript embutido (`PA.txt`), gerando automaticamente folhas A4 de 15 itens por página (ignorando *"Já Entregue"* por padrão, ou paginando por `Form Página`), com impressão multi-página em 1 clique + exportação opcional de `PA.txt` compatível com o PDF legado.
-   - **Relatório Final — Após o Evento (Guarapari/ES):** preenchível por voz, com resumo estatístico automático e layout de impressão A4 limpo (`@media print`).
-7. **Exportação, Importação & Mesclagem Multi-Dispositivo + Excel**
-   - Exportação de pacote JSON completo (com fotos e rastreio) + compartilhamento nativo (`Web Share API` para WhatsApp/Bluetooth/Drive).
-   - **Importação com Pré-visualização e Resolução de Colisões de Etiquetas** (renumerar automaticamente preservando `etiquetaOrigem`, prefixo por equipamento ou manter), permitindo juntar registros de vários celulares e PCs em um único aparelho.
-   - Importação e exportação nativa `.xlsx` e `.csv` compatível com as 25 colunas da planilha original.
-8. **Modelagem MER + UML Granular**
-   - Documentada em [docs/MER.md](docs/MER.md), [docs/UML.md](docs/UML.md) e [docs/ARQUITETURA.md](docs/ARQUITETURA.md).
-   - **Explorador Gráfico-Visual Interativo (100% offline):** [docs/mer_uml_visual.html](docs/mer_uml_visual.html) e publicado online em https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/mer-uml-visual.html (também acessível na aba **MER + UML** do app).
+### 1. 📦 Perdidos & Achados + Guarda-Volumes
+- **Foto → Etiqueta Gêmea → Foto (+ Foto de Entrega)** com compressão automática via Canvas (~40 KB) e carimbo opcional de etiqueta/hora.
+- **Orientações Oficiais (§54–58)** automatizadas: §55 (*Não Expor* para Alto/Precioso/Carteira/Celular), §56 (*Pessoa/Criança Perdida* — proibido anunciar no microfone), §57 (*Contas* para dinheiro + Deck Swipe *Destinar SA* >= 60 dias com *Reverter Despacho* < 7 dias) e §58 (*Guarda-Volumes* com identificação obrigatória do dono exceto roupas).
+- **Itens Procurados** com cruzamento de similaridade, trava **Abrir/Fechar Evento**, convite copiável para equipe, **Excel 25 colunas** + `PA.txt` Acrobat legado e impressão A4 oficial (**ANEXO 1** 15 linhas/pág + **Relatório Final**).
+
+### 2. 🎙️ Presidência do Congresso
+- **Painel Evento em Foco**: KPIs clicáveis (*Já Compareceram*, *Faltam 1º Dia*, *Ensaios no Palco*, *Dicas A/V & Demos*), cartão ao vivo **No Palco Agora / Próxima Parte** e **Folha do Presidente de Sessão** imprimível em A4 (6 turnos: Sex/Sáb/Dom × Manhã/Tarde).
+- **Programa, Oradores & Ensaios**: Grade de 3 dias × 2 turnos com os 14 tipos e 3 formatos (`Ao Vivo`, `Vídeo`, `Áudio`), flag `Série`, **clonagem de orador** a partir de outra parte, **3 Substitutos** (`1º 🥇`, `2º 🥈`, `3º 🥉`) com promoção em 1 toque, **Check-in em 3 etapas** (`1º Dia`, `30m antes do dia`, `30m antes do palco`), **Ensaio no Palco** e mensagens WhatsApp prontas (incluindo *Salmo 134:3*).
+- **Cronômetro Dual-Mode**: modo **Ao Vivo** (`INÍCIO da Parte` / `FIM da Parte` / `RESTAURAR`) e modo **Ensaio Pessoal** (sem encerrar a parte oficial), com alerta âmbar no **último minuto (`-1 min`)** e alerta vermelho pulsante de **estouro (`PASSOU DA HORA`)**.
+- **Participantes de Demonstrações & Entrevistas (`Programa Parte`)**: gestão de Experiências, Demonstrações, Encenações, Entrevistas e Comentários vinculados às partes do programa, com orientações de palco e check-in de ensaio.
+- **Guia de Áudio & Vídeo**: roteiro agrupado por Parte → Seção → Mídia com destaque para a **Dica Play** exata e chave **Ativar Play** (modo operação ao vivo vs modo edição), também embarcado diretamente dentro de cada parte do programa!
+- **Agenda, Lembretes (7 perfis RBAC com *Já Lido e Feito*) e Documentos de Referência** (`CO-10`, `CO-160`, `CCO-pgm`, `CO-90`, `S-329`).
+
+### 3. 📖 Resumo de A Sentinela
+- **Estudo & Ordem de Entrada em Cascata**: reordenação rápida (`↑`/`↓`) recalculando automaticamente toda a cadeia cronológica `HH:MM:SS` a partir do horário de início (padrão `30s` por comentário) e comparando o total contra a duração prevista.
+- **Coreografia de Palco (`ESQUERDA` / `DIREITA` / `TRIBUNA`)**: banner dourado de alto contraste (`#FFD700`) e **auditoria automática de alternância** alertando se dois comentaristas seguidos entram pelo mesmo lado!
+- **Palco, Galeria de Comentaristas & Matriz de Substituições**: `Resumo Galeria` com fotos para os irmãos do Palco, check-in `1º Dia` + `Ensaio Palco (Domingo 8:30)` com convite WhatsApp em 1 toque, matriz de cobertura dos substitutos e quadro oficial de **Orientações de Palco e Comentários** (`w19.01 p.13 §18`, `w16.09 pp.18-19 §§5-8`, `th lição 5 p.8`).
+- **Imagens a Exibir (Deck A/V)**: lista dedicada para Áudio e Vídeo com alerta vermelho **`👈👈👈 EXIBIR esta imagem`** em ordem exata de entrada.
+- **Estúdio de Áudio Offline, Backup & Player `Áudio Completo`**: gravação local compacta (`MediaRecorder` 16 kbps) para *Pergunta*, *Comentário* e *Conectivo*, ditado por voz `pt-BR` (substituindo IA paga), **Salvar / Recuperar Comentário** (snapshot), player sequencial **`Áudio Completo`** com fallback TTS automático e mural **`Conversar Com Todos`**.
+
+---
+
+## Recursos Compartilhados da Suíte
+
+- **Equipe & Voluntários**: cadastro único (com foto, congregação, 15 departamentos, 5 áreas e flags de elegibilidade) que alimenta Presidência, Demonstrações e A Sentinela.
+- **Acessibilidade por Voz (`pt-BR`)**: comandos globais (`Alt+V` / `Ctrl+K`) para alternar entre os 3 apps, buscar, ditar campos e ouvir resumo falado (TTS), além de **Alto Contraste** e ajuste de fonte.
+- **Exportar, Importar & Mesclar Multi-Dispositivo (`localStorage` v2)**: consolida pacotes `.json` entre vários celulares e PCs mantendo todos os 3 apps sincronizados e resolvendo colisões de etiquetas com segurança.
+- **Modelagem MER + UML Granular (17 Entidades)**: documentada em [docs/MER.md](docs/MER.md), [docs/UML.md](docs/UML.md), [docs/ARQUITETURA.md](docs/ARQUITETURA.md) e no explorador gráfico SVG offline [docs/mer_uml_visual.html](docs/mer_uml_visual.html) (online: https://eliezerrosa.github.io/assembleia-perdidos-achados-pwa/mer-uml-visual.html).
 
 ---
 
 ## Como Executar
 
 ```bash
-# 1. Instalar dependências
 npm install
-
-# 2. Rodar em desenvolvimento (acessível também na rede local para testar no celular!)
-npm run dev
-
-# 3. Executar testes unitários e verificação de tipos
-npm run typecheck
-npm test
-
-# 4. Gerar build de produção PWA (pasta dist/)
-npm run build
-npm run preview
+npm run dev        # Desenvolvimento local (PC + rede mobile)
+npm run typecheck  # Verificação estrita TypeScript
+npm test           # Suíte Vitest (18 testes em 6 arquivos)
+npm run build      # Build de produção PWA (dist/)
 ```
 
 ---
 
 ## Privacidade & LGPD
 
-- Nenhum dado pessoal real da planilha operacional é incluído neste repositório.
-- O `.gitignore` bloqueia arquivos `*.xlsx`, `*.xls`, `*.csv` e `*.backup.json`.
-- Para trabalhar com sua base histórica, abra a aba **Exportar / Mesclar** no PWA e clique em **Importar Planilha Excel (.xlsx)** — os dados permanecem estritamente no `localStorage` do seu navegador.
+- Nenhum dado pessoal real (nomes, telefones, endereços ou planilhas reais) é versionado neste repositório público.
+- O botão de demonstração carrega apenas dados **100% fictícios** cobrindo todos os 3 apps embutidos.

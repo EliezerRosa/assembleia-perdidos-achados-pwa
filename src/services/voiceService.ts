@@ -176,7 +176,41 @@ export function parseVoiceCommand(
     return { type: 'OPEN_NEW_WANTED' };
   }
 
-  // Navegação principal
+  // Navegação — App Embutido 2: Presidência do Congresso
+  if (/(abrir |ir para |mostrar )?(presidencia|evento em foco|painel presidencia|congresso foco)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'presidencia_foco' };
+  }
+  if (/(abrir |ir para |mostrar )?(programa|oradores|ensaios|cronometro)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'presidencia_programa' };
+  }
+  if (/(abrir |ir para |mostrar )?(demonstracoes|demonstracao|entrevistas|participantes|participacoes)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'presidencia_demos' };
+  }
+  if (/(abrir |ir para |mostrar )?(guia audio|audio e video|guia av|midia|dicas play)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'presidencia_av' };
+  }
+  if (/(abrir |ir para |mostrar )?(agenda|lembretes|documentos|referencias)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'presidencia_agenda' };
+  }
+
+  // Navegação — App Embutido 3: Resumo de A Sentinela
+  if (/(abrir |ir para |mostrar )?(palco|galeria|resumo galeria|comentaristas|substituicoes)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'sentinela_palco' };
+  }
+  if (/(abrir |ir para |mostrar )?(imagens a exibir|imagens sentinela|imagens av|exibir imagem)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'sentinela_imagens' };
+  }
+  if (/(abrir |ir para |mostrar )?(audio completo|ensaio audio|gravacoes|gravar comentario)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'sentinela_audio' };
+  }
+  if (/(abrir |ir para |mostrar )?(sentinela|resumo de a sentinela|estudo sentinela|ordem de entrada)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'sentinela_estudo' };
+  }
+  if (/(abrir |ir para |mostrar )?(equipe|voluntarios|cadastro voluntarios)/.test(norm)) {
+    return { type: 'NAVIGATE', tab: 'equipe' };
+  }
+
+  // Navegação principal (Achados & Perdidos + Compartilhado)
   if (/(orientacoes|regras|manual|politicas|instrucoes)/.test(norm)) {
     return { type: 'OPEN_POLICIES' };
   }

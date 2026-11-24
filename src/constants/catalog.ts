@@ -1,6 +1,23 @@
-import type { CategoriaItem, DestinoSA, StatusItem, ValorItem } from '../types/domain';
+import type {
+  AreaDesignacao,
+  AudienciaLembrete,
+  CategoriaDocumentoRef,
+  CategoriaItem,
+  DepartamentoCongresso,
+  DestinoSA,
+  DiaCongresso,
+  FormatoPartePrograma,
+  FuncaoSetor,
+  MidiaTipoAV,
+  PosicaoPalco,
+  StatusItem,
+  TipoPartePrograma,
+  TipoParticipacao,
+  TipoVoluntario,
+  ValorItem,
+} from '../types/domain';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 /**
  * Catálogo normalizado derivado dos 170 registros reais da planilha
@@ -71,6 +88,156 @@ export const CATEGORIAS_ITEM: CategoriaItem[] = ['Perdido', 'Guardado', 'Crianç
 export const STATUS_ITEM: StatusItem[] = ['Ainda Guardado', 'Em Conferência', 'Já Entregue', 'DESPACHADO'];
 export const DESTINOS_SA: Exclude<DestinoSA, ''>[] = ['DESCARTAR', 'DOAR', 'VENDER', 'CONTAS'];
 
+/* ============================================================================
+ * ENUMS DO APP EMBUTIDO 1 — PRESIDÊNCIA DO CONGRESSO (Glide Listas Padrões)
+ * ============================================================================ */
+
+export const DIAS_CONGRESSO: DiaCongresso[] = ['Sexta-feira', 'Sábado', 'Domingo'];
+
+export const PROGRAMA_TIPOS: TipoPartePrograma[] = [
+  'Introdução',
+  'Cântico',
+  'Oração',
+  'Cronômetro',
+  'Discurso',
+  'Anúncio',
+  'Reunião',
+  'Programa Musical',
+  'Intervalo',
+  'Relatório',
+  'Tema do Dia',
+  'Ensaio no Palco',
+  'Leitura Dramatizada',
+  'Drama',
+];
+
+export const PROGRAMA_FORMATOS: FormatoPartePrograma[] = ['Ao Vivo', 'Vídeo', 'Áudio'];
+
+export const PARTICIPACAO_TIPOS: TipoParticipacao[] = [
+  'Experiências',
+  'Demonstração',
+  'Encenação',
+  'Entrevista',
+  'Comentários',
+];
+
+export const MIDIA_TIPOS_AV: MidiaTipoAV[] = ['Vídeo', 'Áudio', 'Imagem', 'Slide', 'Cântico', 'Cronômetro'];
+
+export const DEPARTAMENTOS_CONGRESSO: DepartamentoCongresso[] = [
+  'Presidência',
+  'Comissão do Congresso',
+  'Áudio e Vídeo',
+  'Batismo',
+  'Contas',
+  'Indicadores',
+  'Segurança',
+  'Limpeza',
+  'Estacionamentos',
+  'Cuidados Infantis',
+  'Primeiros Socorros',
+  'Hospedagem',
+  'Achados e Perdidos',
+  'Sistema de Transporte',
+  'Informações e Serviço Voluntário',
+];
+
+export const AREAS_DESIGNACAO: AreaDesignacao[] = ['Departamento', 'Supervisão', 'Vídeo', 'Áudio', 'Palco'];
+
+export const TIPOS_VOLUNTARIO: TipoVoluntario[] = [
+  'Ancião',
+  'Servo Ministerial',
+  'Publicador Adulto',
+  'Publicador Jovem',
+  'Publicador Menor',
+  'Irmã',
+];
+
+export const FUNCOES_SETOR: FuncaoSetor[] = [
+  'Presidente',
+  'Sup. Programa',
+  'Presidente Sessão',
+  'Homem-Chave',
+  'Capitão',
+  'Voluntário',
+];
+
+export const PRESIDENCIA_AUDIENCIAS: AudienciaLembrete[] = [
+  'Todos',
+  'Presidente',
+  'Equipe Presidência',
+  'Sup. Programa',
+  'Presidente Sessão',
+  'Áudio e Vídeo',
+  'Orador',
+];
+
+export const CATEGORIAS_DOCUMENTO_REF: CategoriaDocumentoRef[] = [
+  'Presidência',
+  'Programa',
+  'Áudio e Vídeo',
+  'Sentinela',
+  'Geral',
+];
+
+export const PRESIDENCIA_CHECKIN_ETAPAS = [
+  { key: 'checkInDia1' as const, numero: 1, curto: '1º Dia', label: 'Apresentou-se no 1º dia do congresso' },
+  { key: 'checkIn30MinDia' as const, numero: 2, curto: '30m Dia', label: 'Apresentou-se 30 min antes do início do dia' },
+  { key: 'checkIn30MinPalco' as const, numero: 3, curto: '30m Palco', label: 'Apresentou-se 30 min antes de entrar no palco' },
+];
+
+/* ============================================================================
+ * ENUMS & ORIENTAÇÕES DO APP EMBUTIDO 2 — RESUMO DE A SENTINELA
+ * ============================================================================ */
+
+export const POSICOES_PALCO: PosicaoPalco[] = ['ESQUERDA', 'DIREITA', 'TRIBUNA'];
+
+export const POSICAO_PALCO_STYLE: Record<
+  PosicaoPalco,
+  { bg: string; text: string; border: string; bannerBg: string; label: string }
+> = {
+  ESQUERDA: {
+    bg: 'bg-amber-100',
+    text: 'text-amber-950',
+    border: 'border-amber-400',
+    bannerBg: 'bg-[#FFD700] text-slate-950',
+    label: '⬅️ ESQUERDA',
+  },
+  DIREITA: {
+    bg: 'bg-sky-100',
+    text: 'text-sky-950',
+    border: 'border-sky-400',
+    bannerBg: 'bg-[#FFD700] text-slate-950',
+    label: 'DIREITA ➡️',
+  },
+  TRIBUNA: {
+    bg: 'bg-purple-100',
+    text: 'text-purple-950',
+    border: 'border-purple-400',
+    bannerBg: 'bg-[#FFD700] text-slate-950',
+    label: '🎙️ TRIBUNA',
+  },
+};
+
+export const SENTINELA_ORIENTACOES = {
+  palco: [
+    'Entrar no palco somente na sua vez, seguindo a sinalização do irmão do Palco.',
+    'Alternar rigorosamente os dois lados do palco (ESQUERDA ↔ DIREITA) para dar dinamismo e evitar filas no mesmo acesso.',
+    'Casais entram juntos pelo mesmo lado; publicadores solteiros entram sozinhos.',
+    'Sair discretamente pelo mesmo lado logo após concluir o comentário.',
+  ],
+  comentarios: [
+    'Comentários devem ser breves (~30 segundos), naturais e com suas próprias palavras — NÃO ler no celular ou papel.',
+    'Falar olhando para o dirigente na tribuna, como numa conversa calorosa — não discursar para a assistência.',
+    'Irmãs devem responder de forma modesta e edificante, evitando tom de conselho ou ensino direto à assistência.',
+    'Ao confirmar presença no 1º dia e participar do Ensaio no Palco (Domingo 8:30), alinhar microfone, postura e sinalização visual.',
+  ],
+  referencias: [
+    { codigo: 'w19.01 p. 13 §18', tema: 'Como dar comentários breves, claros e edificantes' },
+    { codigo: 'w16.09 pp. 18-19 §§5-8', tema: 'Modéstia, preparação e participação no estudo' },
+    { codigo: 'th lição 5 p. 8', tema: 'Leitura exata, tom conversante e naturalidade' },
+  ],
+};
+
 /**
  * Orientações oficiais do Departamento de Achados e Perdidos e Guarda-Volumes
  * (transcritas fielmente do quadro de instruções S-330 parágrafos 54 a 58 exibido no app Glide).
@@ -114,12 +281,12 @@ export const ORIENTACOES_OFICIAIS = [
 ];
 
 export const COMANDOS_VOZ_GUIA = [
-  { categoria: 'Navegação', exemplo: '"Abrir eventos" / "Abrir itens" / "Abrir procurados"' },
-  { categoria: 'Destinação SA', exemplo: '"Abrir destinar" / "Itens retidos"' },
-  { categoria: 'Relatório & Sync', exemplo: '"Abrir relatório" / "Abrir sincronização" / "Abrir arquitetura"' },
-  { categoria: 'Cadastro Rápido', exemplo: '"Novo item" / "Abrir guarda-volumes" / "Criança perdida"' },
+  { categoria: 'Achados & Perdidos', exemplo: '"Abrir itens" / "Novo item" / "Abrir guarda-volumes" / "Criança perdida"' },
+  { categoria: 'Destinação & Relatório', exemplo: '"Abrir destinar" / "Abrir procurados" / "Abrir relatório"' },
+  { categoria: 'Presidência do Congresso', exemplo: '"Abrir presidência" / "Abrir programa" / "Abrir demonstrações" / "Abrir guia áudio e vídeo" / "Abrir agenda"' },
+  { categoria: 'Resumo de A Sentinela', exemplo: '"Abrir sentinela" / "Abrir palco" / "Abrir galeria" / "Abrir imagens" / "Abrir áudio completo"' },
+  { categoria: 'Equipe, Sync & UML', exemplo: '"Abrir equipe" / "Abrir sincronização" / "Abrir arquitetura" / "Ler resumo"' },
   { categoria: 'Busca & Filtros', exemplo: '"Buscar garrafa" / "Filtrar guardados" / "Filtrar entregues"' },
-  { categoria: 'Resumo Falado', exemplo: '"Ler resumo"' },
   {
     categoria: 'Preencher Formulário',
     exemplo: '"Celular Samsung capa verde, valor alto, categoria perdido, quem trouxe Maria no banheiro"',

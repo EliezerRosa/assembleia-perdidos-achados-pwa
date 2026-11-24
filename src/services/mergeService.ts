@@ -2,14 +2,23 @@ import type {
   AppDatabase,
   ColisaoEtiquetaPreview,
   ConflitoIdPreview,
+  ConversaMensagem,
+  DocumentoReferencia,
   EstrategiaColisaoEtiqueta,
   EstrategiaConflitoId,
   Evento,
+  GuiaAudioVideo,
   Item,
+  LembreteAgenda,
   MergePreview,
+  ParticipacaoPrograma,
+  ProgramaParte,
   RastreioEvento,
+  SentinelaComentario,
+  SentinelaEstudo,
   SyncBundle,
   SyncLogEntry,
+  Voluntario,
 } from '../types/domain';
 import { createTrackingEvent, formatEtiquetaCodigo, generateId } from './trackingService';
 
@@ -17,9 +26,8 @@ export function buildSyncBundle(db: AppDatabase, scope: 'all' | 'single_event', 
   const targetEventoId = scope === 'single_event' ? eventoId ?? db.activeEventoId : null;
   const eventos = targetEventoId ? db.eventos.filter((e) => e.id === targetEventoId) : db.eventos;
   const eventoIds = new Set(eventos.map((e) => e.id));
-  const itens = targetEventoId ? db.itens.filter((i) => eventoIds.has(i.eventoId)) : db.itens;
-  const procurados = targetEventoId ? db.procurados.filter((p) => eventoIds.has(p.eventoId)) : db.procurados;
-  const relatorios = targetEventoId ? db.relatorios.filter((r) => eventoIds.has(r.eventoId)) : db.relatorios;
+  const filterByEvent = <T extends { eventoId: string }>(arr: T[]): T[] =>
+    targetEventoId ? arr.filter((x) => eventoIds.has(x.eventoId)) : arr;
 
   return {
     format: 'ASSEMBLEIA_PA_SYNC_V1',
@@ -28,10 +36,19 @@ export function buildSyncBundle(db: AppDatabase, scope: 'all' | 'single_event', 
     sourceDeviceName: db.config.deviceName,
     scope,
     eventos,
-    itens,
-    procurados,
-    relatorios,
+    itens: filterByEvent(db.itens),
+    procurados: filterByEvent(db.procurados),
+    relatorios: filterByEvent(db.relatorios),
     tiposPersonalizados: db.tiposPersonalizados,
+    voluntarios: filterByEvent(db.voluntarios),
+    conversas: filterByEvent(db.conversas),
+    programaPartes: filterByEvent(db.programaPartes),
+    participacoes: filterByEvent(db.participacoes),
+    guiaAV: filterByEvent(db.guiaAV),
+    lembretes: filterByEvent(db.lembretes),
+    referencias: filterByEvent(db.referencias),
+    sentinelaEstudos: filterByEvent(db.sentinelaEstudos),
+    sentinelaComentarios: filterByEvent(db.sentinelaComentarios),
   };
 }
 
@@ -49,7 +66,7 @@ export function parseSyncBundle(jsonText: string): { bundle?: SyncBundle; error?
 
 /**
  * Mapeia eventos recebidos para eventos locais equivalentes (mesmo ID ou mesmo Código + Data)
- * para permitir juntar itens registrados em celulares/PCs diferentes para o MESMO evento!
+ * para permitir juntar registros criados em celulares/PCs diferentes para o MESMO evento!
  */
 function buildEventMapping(localEventos: Evento[], incomingEventos: Evento[]): {
   eventIdMap: Map<string, string>;
@@ -97,6 +114,56 @@ function diffItemFields(a: Item, b: Item): string[] {
   return diffs;
 }
 
+function mergeByIdNewestWins<T extends { id: string; eventoId: string; updatedAt: string }>(
+  localList: T[],
+  incomingList: T[] | undefined,
+  eventIdMap: Map<string, string>,
+  estrategia: EstrategiaConflitoId,
+): { merged: T[]; added: number; updated: number } {
+  if (!Array.isArray(incomingList) || incomingList.length === 0) {
+    return { merged: localList, added: 0, updated: 0 };
+  }
+  const merged = [...localList];
+  const idxMap = new Map(merged.map((x, idx) => [x.id, idx]));
+  let added = 0;
+  let updated = 0;
+
+  for (const rawInc of incomingList) {
+    const inc: T = { ...rawInc, eventoId: eventIdMap.get(rawInc.eventoId) ?? rawInc.eventoId };
+    const idx = idxMap.get(inc.id);
+    if (idx === undefined) {
+      idxMap.set(inc.id, merged.length);
+      merged.push(inc);
+      added++;
+    } else if (estrategia !== 'manter_local') {
+      const existing = merged[idx];
+      const pickIncoming =
+        estrategia === 'sobrescrever_importado' ||
+        new Date(inc.updatedAt).getTime() > new Date(existing.updatedAt).getTime();
+      if (pickIncoming) {
+        merged[idx] = inc;
+        updated++;
+      }
+    }
+  }
+  return { merged, added, updated };
+}
+
+function mergeAppendOnlyById<T extends { id: string; eventoId: string }>(
+  localList: T[],
+  incomingList: T[] | undefined,
+  eventIdMap: Map<string, string>,
+): { merged: T[]; added: number } {
+  if (!Array.isArray(incomingList) || incomingList.length === 0) {
+    return { merged: localList, added: 0 };
+  }
+  const existingIds = new Set(localList.map((x) => x.id));
+  const additions = incomingList
+    .filter((x) => !existingIds.has(x.id))
+    .map((x) => ({ ...x, eventoId: eventIdMap.get(x.eventoId) ?? x.eventoId }));
+  return { merged: [...localList, ...additions], added: additions.length };
+}
+
 export function previewMerge(localDb: AppDatabase, bundle: SyncBundle): MergePreview {
   const { eventIdMap, novosEventos, mescladosCount } = buildEventMapping(localDb.eventos, bundle.eventos);
 
@@ -125,7 +192,6 @@ export function previewMerge(localDb: AppDatabase, bundle: SyncBundle): MergePre
       continue;
     }
 
-    // Novo ID: verifica se já existe item local no mesmo evento com o mesmo número/código de etiqueta
     const collidingLocal = localDb.itens.find(
       (loc) =>
         loc.eventoId === mappedEventoId &&
@@ -152,6 +218,16 @@ export function previewMerge(localDb: AppDatabase, bundle: SyncBundle): MergePre
     .map((r) => ({ ...r, eventoId: eventIdMap.get(r.eventoId) ?? r.eventoId }))
     .filter((r) => !localRelatorioEvtIds.has(r.eventoId));
 
+  // Preview dos novos módulos (Presidência + Sentinela + Equipe)
+  const volPrev = mergeByIdNewestWins(localDb.voluntarios, bundle.voluntarios, eventIdMap, 'mais_recente');
+  const prgPrev = mergeByIdNewestWins(localDb.programaPartes, bundle.programaPartes, eventIdMap, 'mais_recente');
+  const prtPrev = mergeByIdNewestWins(localDb.participacoes, bundle.participacoes, eventIdMap, 'mais_recente');
+  const avPrev = mergeByIdNewestWins(localDb.guiaAV, bundle.guiaAV, eventIdMap, 'mais_recente');
+  const lemPrev = mergeByIdNewestWins(localDb.lembretes, bundle.lembretes, eventIdMap, 'mais_recente');
+  const estPrev = mergeByIdNewestWins(localDb.sentinelaEstudos, bundle.sentinelaEstudos, eventIdMap, 'mais_recente');
+  const comPrev = mergeByIdNewestWins(localDb.sentinelaComentarios, bundle.sentinelaComentarios, eventIdMap, 'mais_recente');
+  const msgPrev = mergeAppendOnlyById(localDb.conversas, bundle.conversas, eventIdMap);
+
   return {
     sourceDeviceName: bundle.sourceDeviceName,
     exportedAt: bundle.exportedAt,
@@ -163,6 +239,16 @@ export function previewMerge(localDb: AppDatabase, bundle: SyncBundle): MergePre
     colisoesEtiqueta,
     novosProcurados,
     novosRelatorios,
+    novosVoluntarios: volPrev.added,
+    novasPartesPrograma: prgPrev.added,
+    partesAtualizadas: prgPrev.updated,
+    novasParticipacoes: prtPrev.added,
+    novosGuiasAV: avPrev.added,
+    novosLembretes: lemPrev.added,
+    novosEstudosSentinela: estPrev.added,
+    novosComentariosSentinela: comPrev.added,
+    comentariosAtualizados: comPrev.updated,
+    novasConversas: msgPrev.added,
   };
 }
 
@@ -242,7 +328,6 @@ export function executeMerge(
 
       mergedItens[existingIdx] = {
         ...winner,
-        // Preserva fotos caso apenas um dos lados tenha foto
         fotoEntrada: winner.fotoEntrada || loser.fotoEntrada,
         fotoEtiqueta: winner.fotoEtiqueta || loser.fotoEtiqueta,
         fotoEntrega: winner.fotoEntrega || loser.fotoEntrega,
@@ -256,7 +341,6 @@ export function executeMerge(
       continue;
     }
 
-    // Novo item vindo de outro equipamento
     const hasCollision = mergedItens.some(
       (m) => m.eventoId === mappedEventoId && (m.etiqueta === inc.etiqueta || m.etiquetaCodigo === inc.etiquetaCodigo),
     );
@@ -303,7 +387,6 @@ export function executeMerge(
     itensAdicionados++;
   }
 
-  // Atualiza proximaEtiqueta de cada evento com base nos itens consolidados
   const finalEventos = mergedEventos.map((ev) => {
     const maxEtq = mergedItens
       .filter((i) => i.eventoId === ev.id)
@@ -314,13 +397,11 @@ export function executeMerge(
     };
   });
 
-  // Mescla procurados
   const existingProcuradoIds = new Set(localDb.procurados.map((p) => p.id));
   const novosProcurados = bundle.procurados
     .filter((p) => !existingProcuradoIds.has(p.id))
     .map((p) => ({ ...p, eventoId: eventIdMap.get(p.eventoId) ?? p.eventoId }));
 
-  // Mescla relatórios (adiciona se não houver relatório para o evento)
   const existingRelEvtIds = new Set(localDb.relatorios.map((r) => r.eventoId));
   const novosRelatorios = bundle.relatorios
     .map((r) => ({ ...r, eventoId: eventIdMap.get(r.eventoId) ?? r.eventoId }))
@@ -329,6 +410,23 @@ export function executeMerge(
   const tiposPersonalizados = Array.from(
     new Set([...localDb.tiposPersonalizados, ...(bundle.tiposPersonalizados ?? [])]),
   ).sort();
+
+  // Mesclagem dos Apps Embutidos (Presidência + Sentinela + Equipe)
+  const volM = mergeByIdNewestWins<Voluntario>(localDb.voluntarios, bundle.voluntarios, eventIdMap, options.estrategiaConflitoId);
+  const prgM = mergeByIdNewestWins<ProgramaParte>(localDb.programaPartes, bundle.programaPartes, eventIdMap, options.estrategiaConflitoId);
+  const prtM = mergeByIdNewestWins<ParticipacaoPrograma>(localDb.participacoes, bundle.participacoes, eventIdMap, options.estrategiaConflitoId);
+  const avM = mergeByIdNewestWins<GuiaAudioVideo>(localDb.guiaAV, bundle.guiaAV, eventIdMap, options.estrategiaConflitoId);
+  const lemM = mergeByIdNewestWins<LembreteAgenda>(localDb.lembretes, bundle.lembretes, eventIdMap, options.estrategiaConflitoId);
+  const refM = mergeByIdNewestWins<DocumentoReferencia>(localDb.referencias, bundle.referencias, eventIdMap, options.estrategiaConflitoId);
+  const estM = mergeByIdNewestWins<SentinelaEstudo>(localDb.sentinelaEstudos, bundle.sentinelaEstudos, eventIdMap, options.estrategiaConflitoId);
+  const comM = mergeByIdNewestWins<SentinelaComentario>(localDb.sentinelaComentarios, bundle.sentinelaComentarios, eventIdMap, options.estrategiaConflitoId);
+  const msgM = mergeAppendOnlyById<ConversaMensagem>(localDb.conversas, bundle.conversas, eventIdMap);
+
+  const extraResumoParts: string[] = [];
+  if (prgM.added + prgM.updated > 0) extraResumoParts.push(`Programa: +${prgM.added}/${prgM.updated} atu.`);
+  if (comM.added + comM.updated > 0) extraResumoParts.push(`Sentinela: +${comM.added}/${comM.updated} atu.`);
+  if (volM.added > 0) extraResumoParts.push(`Equipe: +${volM.added}`);
+  const extraSuffix = extraResumoParts.length > 0 ? ` • ${extraResumoParts.join(' | ')}` : '';
 
   const log: SyncLogEntry = {
     id: generateId('sync'),
@@ -340,7 +438,7 @@ export function executeMerge(
     itensAtualizados,
     colisoesResolvidas,
     procuradosAdicionados: novosProcurados.length,
-    detalhes: `Mesclagem de "${bundle.sourceDeviceName}" (estratégia colisão: ${options.estrategiaColisaoEtiqueta}, conflito ID: ${options.estrategiaConflitoId}).`,
+    detalhes: `Mesclagem de "${bundle.sourceDeviceName}" (colisão: ${options.estrategiaColisaoEtiqueta}, conflito: ${options.estrategiaConflitoId})${extraSuffix}.`,
   };
 
   const activeEventoId =
@@ -355,6 +453,15 @@ export function executeMerge(
       procurados: [...localDb.procurados, ...novosProcurados],
       relatorios: [...localDb.relatorios, ...novosRelatorios],
       tiposPersonalizados,
+      voluntarios: volM.merged,
+      programaPartes: prgM.merged,
+      participacoes: prtM.merged,
+      guiaAV: avM.merged,
+      lembretes: lemM.merged,
+      referencias: refM.merged,
+      sentinelaEstudos: estM.merged,
+      sentinelaComentarios: comM.merged,
+      conversas: msgM.merged.sort((a, b) => a.timestamp.localeCompare(b.timestamp)),
       syncHistory: [log, ...localDb.syncHistory].slice(0, 50),
     },
     log,

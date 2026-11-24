@@ -22,6 +22,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
 }) => {
   const {
     db,
+    activeSuite,
     activeEvento,
     setActiveTab,
     setSearchQuery,
@@ -35,6 +36,7 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
     updateConfig,
     notify,
     retidosCount,
+    faltamDia1Count,
   } = useAppStore();
 
   const [panelOpen, setPanelOpen] = useState(false);
@@ -66,6 +68,16 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
             procurados: 'Itens Procurados',
             destinar: 'Destinar Itens Retidos',
             relatorio: 'Relatório Final',
+            presidencia_foco: 'Presidência do Congresso — Evento em Foco',
+            presidencia_programa: 'Programa, Oradores e Ensaios',
+            presidencia_demos: 'Participantes de Demonstrações e Entrevistas',
+            presidencia_av: 'Guia de Áudio e Vídeo',
+            presidencia_agenda: 'Agenda, Lembretes e Documentos',
+            sentinela_estudo: 'Resumo de A Sentinela — Estudo e Ordem de Entrada',
+            sentinela_palco: 'Resumo de A Sentinela — Palco e Galeria',
+            sentinela_imagens: 'Resumo de A Sentinela — Imagens a Exibir',
+            sentinela_audio: 'Resumo de A Sentinela — Áudio Completo',
+            equipe: 'Equipe e Voluntários',
             sincronizar: 'Exportar, Importar e Mesclar',
             arquitetura: 'Arquitetura MER e UML',
           };
@@ -122,6 +134,24 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
           break;
         }
         case 'SPEAK_SUMMARY': {
+          if (activeSuite === 'presidencia') {
+            const partes = activeEvento
+              ? db.programaPartes.filter((p) => p.eventoId === activeEvento.id)
+              : db.programaPartes;
+            const avCount = activeEvento
+              ? db.guiaAV.filter((g) => g.eventoId === activeEvento.id).length
+              : db.guiaAV.length;
+            feedback = `Presidência do Congresso: ${partes.length} partes no programa, ${faltamDia1Count} oradores ainda sem confirmação do primeiro dia e ${avCount} dicas no Guia de Áudio e Vídeo.`;
+            break;
+          }
+          if (activeSuite === 'sentinela') {
+            const coms = activeEvento
+              ? db.sentinelaComentarios.filter((c) => c.eventoId === activeEvento.id)
+              : db.sentinelaComentarios;
+            const ensaiosOk = coms.filter((c) => c.ensaioPalcoFeito).length;
+            feedback = `Resumo de A Sentinela: ${coms.length} comentários na ordem de entrada, ${ensaiosOk} com ensaio no palco concluído.`;
+            break;
+          }
           const evtItems = activeEvento ? db.itens.filter((i) => i.eventoId === activeEvento.id) : db.itens;
           const guardados = evtItems.filter((i) => i.status === 'Ainda Guardado' || i.status === 'Em Conferência').length;
           const entregues = evtItems.filter((i) => i.status === 'Já Entregue').length;
@@ -170,10 +200,15 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
     },
     [
       activeEvento,
+      activeSuite,
       closeNewItemModal,
       db.config.vozFeedbackFalado,
+      db.guiaAV,
       db.itens,
+      db.programaPartes,
+      db.sentinelaComentarios,
       db.tiposPersonalizados,
+      faltamDia1Count,
       newItemModal.open,
       notify,
       onOpenNewEvent,
@@ -360,7 +395,12 @@ export const VoiceAssistant: React.FC<VoiceAssistantProps> = ({
 
             {/* Chips de atalho rápido */}
             <div className="flex flex-wrap gap-1.5">
-              {['Novo item', 'Abrir guarda-volumes', 'Criança perdida', 'Abrir destinar', 'Ler resumo'].map((chip) => (
+              {(activeSuite === 'presidencia'
+                ? ['Abrir presidência', 'Abrir programa', 'Abrir demonstrações', 'Abrir guia áudio e vídeo', 'Ler resumo']
+                : activeSuite === 'sentinela'
+                  ? ['Abrir sentinela', 'Abrir palco', 'Abrir imagens', 'Abrir áudio completo', 'Ler resumo']
+                  : ['Novo item', 'Abrir guarda-volumes', 'Abrir presidência', 'Abrir sentinela', 'Ler resumo']
+              ).map((chip) => (
                 <button
                   key={chip}
                   type="button"

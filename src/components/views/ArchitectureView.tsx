@@ -11,302 +11,262 @@ interface DiagramSpec {
 const DIAGRAMS: DiagramSpec[] = [
   {
     id: 'mer',
-    title: '1. MER (Entidade-Relacionamento)',
-    subtitle: 'Modelo completo com todas as entidades, chaves, cardinalidades e mapeamento da planilha Excel.',
+    title: '1. MER Completo (3 Apps Embutidos)',
+    subtitle: '17 entidades: Achados & Guarda-Volumes + Presidência do Congresso + Resumo de A Sentinela + Equipe.',
     code: `erDiagram
-    EVENTO ||--o{ ITEM : "possui (1:N)"
-    EVENTO ||--o{ ITEM_PROCURADO : "registra (1:N)"
-    EVENTO ||--o| RELATORIO_FINAL : "gera (1:1)"
-    ITEM ||--|{ RASTREIO_EVENTO : "rastreia (1:N)"
-    ITEM }o--o{ ITEM_PROCURADO : "corresponde_a (N:M)"
-    CONFIG_DISPOSITIVO ||--o{ SYNC_LOG : "audita (1:N)"
+    EVENTO ||--o{ ITEM : "achados (1:N)"
+    EVENTO ||--o{ ITEM_PROCURADO : "procurados (1:N)"
+    EVENTO ||--o| RELATORIO_FINAL : "relatorio (1:1)"
+    ITEM ||--|{ RASTREIO_EVENTO : "rastreio (1:N)"
+    ITEM }o--o{ ITEM_PROCURADO : "match (N:M)"
     TIPO_ITEM_CATALOGO ||--o{ ITEM : "classifica (1:N)"
+
+    EVENTO ||--o{ VOLUNTARIO : "equipe (1:N)"
+    EVENTO ||--o{ PROGRAMA_PARTE : "programa (1:N)"
+    EVENTO ||--o{ LEMBRETE_AGENDA : "agenda_rbac (1:N)"
+    EVENTO ||--o{ DOCUMENTO_REFERENCIA : "docs (1:N)"
+    EVENTO ||--o{ SENTINELA_ESTUDO : "sentinela (1:N)"
+    EVENTO ||--o{ CONVERSA_MENSAGEM : "chat (1:N)"
+
+    VOLUNTARIO ||--o{ PROGRAMA_PARTE : "orador/sub (1:N)"
+    VOLUNTARIO ||--o{ PARTICIPACAO_PROGRAMA : "demos (1:N)"
+    VOLUNTARIO ||--o{ SENTINELA_COMENTARIO : "comentarista/sub (1:N)"
+
+    PROGRAMA_PARTE ||--o{ PARTICIPACAO_PROGRAMA : "participantes (1:N)"
+    PROGRAMA_PARTE ||--o{ GUIA_AUDIO_VIDEO : "dicas_play (1:N)"
+    SENTINELA_ESTUDO ||--o{ SENTINELA_COMENTARIO : "ordem_cascata (1:N)"
+    CONFIG_DISPOSITIVO ||--o{ SYNC_LOG : "audita (1:N)"
 
     EVENTO {
       string id PK "fk_id_Eventos"
       string tipo "Assembleia | Congresso"
-      string codigo "ES-005.27.1 | CO-2027"
-      string circuito "ES-005"
-      string parte "A | B | Unica"
-      date data "Evento Data"
-      string local "Salao de Assembleias"
-      int proximaEtiqueta "Auto-incremento"
-      string status "ativo (ABRIR) | encerrado (FECHAR)"
+      string codigo "CO-ES005 | ES-005.27.1"
+      string status "ativo | encerrado"
+    }
+    VOLUNTARIO {
+      string id PK "vol_*"
+      string nome
+      string departamento "15 departamentos"
+      string funcaoSetor "Presidente|Sup.Prog|Capitao|Vol"
+      boolean habilitadoSentinela
+      boolean habilitadoDemos
+    }
+    PROGRAMA_PARTE {
+      string id PK "prg_*"
+      string dia "Sexta | Sabado | Domingo"
+      datetime dataHoraInicioProgramada
+      int tempoProgramadoMin
+      string tipo "14 tipos"
+      string formato "Ao Vivo | Video | Audio"
+      json substitutos "1o, 2o e 3o"
+      boolean checkInDia1
+      boolean checkIn30MinDia
+      boolean checkIn30MinPalco
+      boolean ensaioPalcoFeito
+      string modoCronometro "parado|ao_vivo|ensaio_pessoal|concluido"
+    }
+    PARTICIPACAO_PROGRAMA {
+      string id PK "prt_*"
+      string programaParteId FK
+      string tipoParticipacao "Experiencias|Demo|Encenacao|Entrevista"
+      boolean ensaioConfirmado
+    }
+    GUIA_AUDIO_VIDEO {
+      string id PK "gav_*"
+      string programaParteId FK
+      int secaoSequencia
+      string midiaTipo "Video|Audio|Imagem|Slide"
+      string dicaPlay "Deixa exata operador"
+      boolean executado "Ativar Play"
+    }
+    SENTINELA_ESTUDO {
+      string id PK "snt_*"
+      string tituloArtigo
+      string horaInicio "Base cascata 10:30"
+      int duracaoPrevistaMin
+    }
+    SENTINELA_COMENTARIO {
+      string id PK "scm_*"
+      string estudoId FK
+      int ordenacao "1..N cascata"
+      int tempoSegundos "30s padrao"
+      string posicaoPalco "ESQUERDA | DIREITA | TRIBUNA"
+      boolean presenteDia1
+      boolean ensaioPalcoFeito
+      boolean jaFeito
+      text imagemRelacionada "EXIBIR esta imagem"
+      json backupSnapshot "Salvar/Recuperar"
     }
     ITEM {
-      string id PK "Row ID / UUID"
-      string eventoId FK "fk_id_Eventos"
-      int etiqueta "Numero sequencial"
-      string etiquetaCodigo "01 | B-01"
-      string etiquetaOrigem "Original antes do merge"
-      int formPagina "Form Pagina (etiqueta gemea)"
-      string tipoItem "Catalogo ou personalizado"
-      string valor "Baixo|Comum|Medio|Alto|Precioso"
-      string categoria "Perdido|Guardado|Crianca|Idoso|Adulto"
-      string fotoEntrada "Foto 1: Item + Etiqueta"
-      boolean etiquetaConfirmadaNoItem
-      boolean etiquetaConfirmadaNoFormulario
-      string fotoEtiqueta "Foto 2: Etiqueta no Formulario"
-      string fotoEntrega "Foto 3: Comprovante Entrega"
-      string status "Ainda Guardado|Em Conferencia|Ja Entregue|DESPACHADO"
-      string destino "DESCARTAR|DOAR|VENDER|CONTAS"
-      datetime dataHoraGuardado
-      string quemTrouxe
-      string localAchado
-      datetime dataHoraDespachado
-      string quemPegou
-      string donoNomeTels
-      string congregacao
-      string endereco
-      string deviceId
-    }
-    RASTREIO_EVENTO {
       string id PK
-      string itemId FK
-      datetime timestamp
-      string etapa "RECEBIDO|ETIQUETADO|FOTO|CONFERENCIA|ENTREGUE|DESPACHADO_SA|TRANSFERIDO"
-      string titulo
-      string detalhes
-      string operador
-      string dispositivo
-      string localizacao
-    }
-    ITEM_PROCURADO {
-      string id PK
-      string eventoId FK
-      string nomeTelefone
-      string congregacao
-      string descricao
-      string foto
-      string status "PROCURANDO|LOCALIZADO|ENTREGUE"
-    }
-    RELATORIO_FINAL {
-      string id PK
-      string eventoId FK
-      string circuito
-      string salaoAssembleias "ANEXO 1"
-      string superintendente
-      int voluntariosNecessarios
-      int voluntariosUsados
-      boolean dificuldadeAntes
-      boolean dificuldadeDurante
-      boolean dificuldadeApos
-      string sugestoes
-      string responsavelRelatorio
-      string telefoneResponsavel "ANEXO 1"
-      string enderecoRestituicao "ANEXO 1"
+      int etiqueta
+      int formPagina "15 linhas/pag"
+      string valor "Baixo..Precioso"
+      string status "Guardado|Conf|Entregue|DESPACHADO"
     }`,
   },
   {
-    id: 'states',
-    title: '2. UML — Máquina de Estados (Ciclo de Vida)',
-    subtitle: 'Todos os estados do item desde a recepção Foto-Etiqueta-Foto até Entrega, Contas ou Destinação SA.',
+    id: 'states-presidencia',
+    title: '2. UML — Estados: Cronômetro Dual-Mode (Presidência)',
+    subtitle: 'Fluxo Ao Vivo vs Ensaio Pessoal com alertas de último minuto (-1 min) e estouro.',
+    code: `stateDiagram-v2
+    [*] --> Parado : Parte cadastrada na grade 3d x 2t
+    Parado --> EnsaioPessoal : INICIAR ENSAIO PESSOAL
+    EnsaioPessoal --> Parado : Encerrar Ensaio (nao fecha a parte oficial)
+    Parado --> AoVivo_Normal : INICIO da Parte (grava inicioRealIso)
+    AoVivo_Normal --> AoVivo_UltimoMinuto : Restante <= 60s (Alerta Ambar -1 min)
+    AoVivo_UltimoMinuto --> AoVivo_Estourado : Restante < 0s (Alerta Vermelho PASSOU DA HORA)
+    AoVivo_Normal --> Concluido : FIM da Parte (congela duracao real)
+    AoVivo_UltimoMinuto --> Concluido : FIM da Parte
+    AoVivo_Estourado --> Concluido : FIM da Parte
+    Concluido --> Parado : RESTAURAR Parte`,
+  },
+  {
+    id: 'states-achados',
+    title: '3. UML — Estados: Ciclo de Vida (Achados & GV)',
+    subtitle: 'Foto 1 → Etiqueta Gêmea → Foto 2, Políticas §55–58, Contas, Destinar SA >=60d e Reverter <7d.',
     code: `stateDiagram-v2
     [*] --> Recepcao_Foto1 : Item/Pessoa chega ao balcao
     Recepcao_Foto1 --> Etiquetagem_Dupla : Foto 1 (Item + Etiqueta #N)
-    Etiquetagem_Dupla --> Registro_Foto2 : Etiqueta gemea colada no Formulario (Pag X)
-    Registro_Foto2 --> Ainda_Guardado : Foto 2 registrada + Dados salvos
-    Registro_Foto2 --> Ja_Entregue : Entrega imediata no ato
-
-    state Ainda_Guardado {
-      [*] --> Mesa_Exposicao : Valor Baixo/Comum/Medio
-      [*] --> Cofre_Restrito : Valor Alto/Precioso (Politica 55)
-      [*] --> Prateleira_GV : Categoria Guardado (Politica 58)
-      [*] --> Protocolo_Pessoa : Crianca/Idoso/Adulto (Politica 56)
-    }
-
-    Ainda_Guardado --> Em_Conferencia : Solicitante descreve / Match Procurado
-    Em_Conferencia --> Ainda_Guardado : Nao correspondeu
-    Em_Conferencia --> Ja_Entregue : Confirmado + Foto 3 + Dados Dono
-    Ainda_Guardado --> Ja_Entregue : Retirada direta + Rastreio Entrega
-    Ainda_Guardado --> Entregue_Contas : Dinheiro nao procurado (Politica 57)
-
-    Ainda_Guardado --> Retido_60d : >= 60 dias sem retirada
+    Etiquetagem_Dupla --> Registro_Foto2 : Etiqueta gemea Formulario (Pag X)
+    Registro_Foto2 --> Ainda_Guardado : Foto 2 + Rastreio
+    Registro_Foto2 --> Ja_Entregue : Entrega imediata
+    Ainda_Guardado --> Em_Conferencia : Solicitante descreve / Procurado
+    Em_Conferencia --> Ainda_Guardado : Nao conferiu
+    Em_Conferencia --> Ja_Entregue : Confirmado + Foto 3
+    Ainda_Guardado --> Entregue_Contas : Dinheiro (§57)
+    Ainda_Guardado --> Retido_60d : >= 60 dias
     Retido_60d --> Despachado_SA : SA escolhe DOAR | VENDER | DESCARTAR
-    Retido_60d --> Ja_Entregue : Dono localizado tardiamente
-
-    Ja_Entregue --> Ainda_Guardado : Reabertura auditada
-    Despachado_SA --> Ainda_Guardado : Reverter Despacho < 7 dias (limpa 4 campos)
-    Entregue_Contas --> [*]
-    Despachado_SA --> [*]
-    Ja_Entregue --> [*]`,
+    Despachado_SA --> Ainda_Guardado : Reverter Despacho < 7 dias`,
   },
   {
-    id: 'seq-intake',
-    title: '3. UML — Sequência: Recepção + Voz + Foto-Etiqueta-Foto',
-    subtitle: 'Fluxo granular de cadastro com acessibilidade por voz, compressão de foto e geração automática de rastreio.',
+    id: 'seq-sentinela',
+    title: '4. UML — Sequência: Resumo de A Sentinela (Cascata & Áudio)',
+    subtitle: 'Reordenação da ordem de entrada, cascata de segundos, alerta de lado repetido e player Áudio Completo.',
     code: `sequenceDiagram
-    actor Vol as Voluntario Balcao
-    participant Voz as VoiceService (pt-BR)
-    participant Form as ItemFormModal
-    participant Photo as PhotoService (Canvas)
-    participant Track as TrackingService
-    participant Store as StorageService (localStorage)
+    actor Dir as Dirigente / Palco
+    participant View as SentinelaView / DetailModal
+    participant Svc as SentinelaService
+    participant Audio as MediaRecorder / Web Speech
+    participant Store as localStorage v2
 
-    Vol->>Voz: Fala "Novo item" (Alt+V)
-    Voz->>Form: OPEN_NEW_ITEM + Proxima Etiqueta #N
-    Vol->>Voz: Dita "Celular Samsung verde, valor alto, quem trouxe Ana no auditorio"
-    Voz->>Voz: parseSpokenItemFields()
-    Voz-->>Form: Preenche tipo, descricao, valor=Alto, quemTrouxe, local
-    Form-->>Vol: Exibe alerta Politica #55 (Nao Expor)
-    Vol->>Photo: Captura Foto 1 (Item com etiqueta #N)
-    Photo-->>Form: JPEG comprimido (~40KB) + carimbo ETQ #N
-    Vol->>Photo: Captura Foto 2 (Etiqueta gemea no Formulario Pag X)
-    Photo-->>Form: JPEG comprimido + checkbox confirmado
-    Vol->>Form: Clica "Salvar Item" (ou fala "Salvar item")
-    Form->>Track: Gera eventos RECEBIDO, ETIQUETADO, FOTO_REGISTRADA
-    Track->>Store: saveDatabase() em localStorage
-    Store-->>Vol: Toast + Retorno falado TTS confirmando Etiqueta #N`,
+    Dir->>View: Reordena pergunta (Subir/Descer) ou altera tempo (30s)
+    View->>Svc: reorderSentinelaComentario() + computeSentinelaSchedule()
+    Svc-->>View: Recalcula HH:MM:SS em cascata + detecta lado repetido (ESQUERDA/DIREITA)
+    Dir->>View: Clica "Salvar Comentario (Backup)"
+    View->>Store: Persiste backupSnapshot
+    Dir->>Audio: Grava audio offline (16kbps) ou dita texto pt-BR
+    Audio-->>Store: Salva audioComentario e texto transcrito
+    Dir->>View: Inicia "Audio Completo" (Ensaio Sequencial)
+    loop Ordem 1..N
+        View->>Audio: Reproduz Pergunta -> Comentario -> Conectivo (audio ou fallback TTS)
+    end`,
   },
   {
-    id: 'seq-merge',
-    title: '4. UML — Sequência: Mesclagem Multi-Dispositivo',
-    subtitle: 'Como juntar itens de vários celulares e PCs em um único dispositivo com detecção e resolução de colisões.',
+    id: 'seq-presidencia',
+    title: '5. UML — Sequência: Presidência Ao Vivo + Guia A/V',
+    subtitle: 'Check-in 3 etapas, WhatsApp Salmo 134:3, Cronômetro Ao Vivo e Dica Play.',
     code: `sequenceDiagram
-    actor CelB as Voluntario (Celular B)
-    participant AppB as PWA Celular B
-    participant Share as Arquivo JSON / Web Share
-    actor PcA as Coordenacao (PC / Mobile A)
-    participant AppA as PWA Equipamento A
-    participant Merge as MergeService
-    participant StoreA as localStorage (A)
+    actor Pres as Presidente / Sup. Programa
+    participant View as PresidenciaHub / ProgramaView
+    participant Svc as PresidenciaService
+    participant AV as GuiaAV (Ativar Play)
+    participant Store as localStorage v2
 
-    CelB->>AppB: Exportar Evento Ativo (JSON)
-    AppB->>Share: Gera SyncBundle V1 (eventos, itens, fotos base64, rastreio)
-    Share-->>PcA: Envia via WhatsApp / Bluetooth / USB / Drive
-    PcA->>AppA: Seleciona arquivo .json em Sincronizar
-    AppA->>Merge: previewMerge(localDb, bundle)
-    Merge->>Merge: Mapeia evento por ID ou (Codigo + Data)
-    Merge->>Merge: Detecta novos itens, conflitos de ID e colisoes de Etiqueta
-    Merge-->>PcA: Exibe MergePreview (ex.: 2 colisoes detectadas)
-    PcA->>Merge: Escolhe estrategia (Renumerar | Prefixo | Manter) e Confirma
-    Merge->>Merge: Preserva etiquetaOrigem + une timelines de rastreio + registra TRANSFERIDO_DISPOSITIVO
-    Merge->>StoreA: Persiste base consolidada + SyncLogEntry
-    StoreA-->>PcA: Todos os itens consolidados em um unico equipamento`,
+    Pres->>View: Marca Check-in (1o Dia, 30m Dia, 30m Palco) + Ensaio Palco OK
+    View->>Store: Salva flags na ProgramaParte
+    Pres->>View: Clica "INICIO da Parte (Ao Vivo)"
+    View->>Store: modoCronometro = ao_vivo
+    loop A cada 1s
+        View->>Svc: computeStopwatchStatus(parte, nowMs)
+        Svc-->>View: Atualiza barra + alertas -1 min / PASSOU DA HORA
+    end
+    Pres->>AV: Acompanha Dica Play e clica "PLAY OK"
+    AV->>Store: guiaAV.executado = true
+    Pres->>View: Clica "FIM da Parte" -> congela duracao real`,
   },
   {
     id: 'classes',
-    title: '5. UML — Diagrama de Classes (Domínio & Serviços)',
-    subtitle: 'Separação limpa entre entidades de domínio e serviços puros testáveis.',
+    title: '6. UML — Classes (Domínio & 8 Serviços Puros)',
+    subtitle: 'Separação limpa entre AppDatabase v2 e serviços puros testados via Vitest.',
     code: `classDiagram
     class AppDatabase {
-      +number schemaVersion
-      +string activeEventoId
-      +ConfiguracaoDispositivo config
+      +number schemaVersion = 2
       +Evento[] eventos
       +Item[] itens
-      +ItemProcurado[] procurados
-      +RelatorioFinal[] relatorios
-      +SyncLogEntry[] syncHistory
+      +Voluntario[] voluntarios
+      +ProgramaParte[] programaPartes
+      +ParticipacaoPrograma[] participacoes
+      +GuiaAudioVideo[] guiaAV
+      +LembreteAgenda[] lembretes
+      +SentinelaEstudo[] sentinelaEstudos
+      +SentinelaComentario[] sentinelaComentarios
+      +ConversaMensagem[] conversas
     }
-    class StorageService {
-      +loadDatabase() AppDatabase
-      +saveDatabase(db) SaveResult
-      +getStorageUsage() QuotaInfo
-      +createDemoSeedData(config) Seed
+    class PresidenciaService {
+      +deriveTurno()
+      +computePresidenciaKpis()
+      +computeStopwatchStatus()
+      +buildSpeakerWhatsappUrl()
+    }
+    class SentinelaService {
+      +reorderSentinelaComentario()
+      +computeSentinelaSchedule()
+      +createSentinelaBackup()
+      +buildBackupCoverageMatrix()
     }
     class TrackingService {
-      +isRestrictedDisplay(item) boolean
-      +isLostPerson(cat) boolean
-      +requiresOwnerIdentification(item) boolean
-      +isItemRetido(item, prazoDias) boolean
-      +transitionItemToConference() TransitionResult
-      +transitionItemToDelivered() TransitionResult
-      +transitionItemToDispatchedSA() TransitionResult
-      +transitionItemReopen() TransitionResult
-    }
-    class PhotoService {
-      +compressImageFile(file, opts) CompressedPhoto
-      +estimateDataUrlKB(dataUrl) number
+      +transitionItemToDelivered()
+      +transitionItemToDispatchedSA()
+      +transitionItemReopen()
     }
     class MergeService {
-      +buildSyncBundle(db, scope) SyncBundle
-      +parseSyncBundle(json) ParseResult
-      +previewMerge(localDb, bundle) MergePreview
-      +executeMerge(localDb, bundle, opts) MergeResult
-    }
-    class ExcelService {
-      +importFromSpreadsheetBuffer(buf, name, db) ExcelImportResult
-      +exportToSpreadsheet(db, format, eventoId) BlobFile
-      +exportToAcrobatTxt(db, eventoId) BlobFile
+      +buildSyncBundle()
+      +previewMerge()
+      +executeMerge()
     }
     class VoiceService {
-      +startSingleUtteranceRecognition(cb) StopFn
-      +parseVoiceCommand(transcript, ctx) VoiceActionType
-      +parseSpokenItemFields(raw, customTypes) PartialItem
-      +speakPtBr(text, enabled) void
+      +parseVoiceCommand()
+      +parseSpokenItemFields()
+      +speakPtBr()
     }
-    StorageService --> AppDatabase
+    class ExcelService {
+      +importFromSpreadsheetBuffer()
+      +exportToSpreadsheet()
+      +exportToAcrobatTxt()
+    }
+    PresidenciaService --> AppDatabase
+    SentinelaService --> AppDatabase
+    TrackingService --> AppDatabase
     MergeService --> AppDatabase
-    MergeService --> TrackingService
-    ExcelService --> AppDatabase
-    ExcelService --> TrackingService
-    VoiceService --> AppDatabase`,
+    VoiceService --> AppDatabase
+    ExcelService --> AppDatabase`,
   },
   {
     id: 'usecases',
-    title: '6. UML — Casos de Uso Granulares',
-    subtitle: 'Mapeamento de atores e funcionalidades até o nível de operação no balcão.',
+    title: '7. UML — Casos de Uso (Suíte 3 Apps)',
+    subtitle: 'Atores e fluxos dos 3 apps embutidos + sincronização multi-dispositivo.',
     code: `flowchart LR
     Vol([Voluntario Balcao])
-    Enc([Encarregado Depto.])
     SA([Superint. Assembleia])
-    Dono([Dono / Solicitante])
-    DevExt([Outro Celular / PC])
+    Pres([Presidente / Sup. Prog])
+    AV([Operador Audio/Video])
+    Dir([Dirigente Sentinela / Palco])
 
-    subgraph PWA ["PWA Perdidos & Achados + Guarda-Volumes"]
-      UC1[UC01 Selecionar / Abrir-Fechar Evento + Convite Equipe]
-      UC2[UC02 Cadastrar Item Foto1-Etiqueta-Foto2 + Form Pagina 15l]
-      UC3[UC03 Cadastrar Guarda-Volumes §58]
-      UC4[UC04 Protocolo Pessoa Perdida §56]
-      UC5[UC05 Acionar Comandos e Ditado por Voz]
-      UC6[UC06 Buscar, 5 Secoes Glide e Conferir Item §55]
-      UC7[UC07 Registrar Entrega + Foto 3 + Rastreio]
-      UC8[UC08 Cadastrar e Cruzar Item Procurado]
-      UC9[UC09 Destinar Swipe >60d + Reverter Despacho <7d]
-      UC10[UC10 Gerar/Imprimir ANEXO 1 15l/pag + Relatorio Final A4]
-      UC11[UC11 Exportar / Importar / Mesclar Dispositivos]
-      UC12[UC12 Importar/Exportar Excel .xlsx e PA.txt Acrobat]
+    subgraph Suite ["Suite Eventos PWA (Offline-First)"]
+      A1[App 1: Achados, Guarda-Vol §55-58, Procurados, Destinar SA, ANEXO 1 A4]
+      A2[App 2: Presidencia Foco, Programa 3d×2t, Check-in 3x, Cronometro, Demos, Agenda RBAC]
+      A3[App 2b: Guia Audio & Video com Dica Play e Ativar Play]
+      A4[App 3: Resumo Sentinela Cascata 30s, Palco ESQ/DIR, Galeria, Substituicoes]
+      A5[App 3b: Imagens a Exibir + Estudio Audio Offline + Audio Completo TTS]
+      A6[Compartilhado: Equipe/Voluntarios + Voz pt-BR + Merge JSON Multi-Dispositivo]
     end
 
-    Vol --> UC1 & UC2 & UC3 & UC4 & UC5 & UC6 & UC7 & UC8
-    Enc --> UC1 & UC10 & UC11 & UC12
-    SA --> UC9 & UC10
-    Dono -.-> UC3 & UC6 & UC7 & UC8
-    DevExt --> UC11`,
-  },
-  {
-    id: 'components',
-    title: '7. UML — Componentes & Implantação PWA',
-    subtitle: 'Arquitetura offline-first rodando em PC, Android e iOS sem dependência de servidor.',
-    code: `flowchart TB
-    subgraph Client ["Dispositivo Usuario (PC / Android / iOS)"]
-      SW[Service Worker Workbox<br/>Cache App Shell Offline]
-      UI[React 19 + Tailwind CSS v4<br/>UI Ergonomica + Alto Contraste + Print A4]
-      Store[React Context Store]
-      LS[(Browser localStorage<br/>assembleia_pa_db_v1)]
-
-      subgraph Engines ["Servicos de Dominio"]
-        TS[TrackingService<br/>Maquina de Estados]
-        PS[PhotoService<br/>Canvas Compress + Carimbo]
-        VS[VoiceService<br/>Web Speech API + TTS]
-        MS[MergeService<br/>Resolucao de Colisoes]
-        ES[ExcelService<br/>SheetJS .xlsx / .csv]
-      end
-
-      Cam[Camera API capture=environment]
-      Mic[Microfone / SpeechRecognition]
-      Share[Web Share API / Download]
-    end
-
-    SW --> UI
-    UI <--> Store
-    Store <--> LS
-    UI --> TS & PS & VS & MS & ES
-    PS --> Cam
-    VS --> Mic
-    MS --> Share
-    ES --> Share`,
+    Vol --> A1 & A6
+    SA --> A1
+    Pres --> A2 & A3 & A6
+    AV --> A3 & A5
+    Dir --> A4 & A5 & A6`,
   },
 ];
 
@@ -369,9 +329,9 @@ export const ArchitectureView: React.FC = () => {
               <Network className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-lg font-extrabold text-slate-900">Arquitetura Interativa — MER & UML Granular</h2>
+              <h2 className="text-lg font-extrabold text-slate-900">Arquitetura Interativa — MER & UML (3 Apps Embutidos)</h2>
               <p className="text-xs text-slate-500">
-                Documentação viva integrada ao PWA (também versionada em <code>docs/MER.md</code>, <code>docs/UML.md</code> e{' '}
+                Documentação viva atualizada com 17 entidades (<code>docs/MER.md</code>, <code>docs/UML.md</code> e{' '}
                 <code>docs/mer_uml_visual.html</code>).
               </p>
             </div>
